@@ -1,0 +1,2944 @@
+{
+ "_incidentStatuses": [
+  {
+   "id": "f012f43a-8cee-5a7f-8a67-5713c895bdc0",
+   "severity": "Severity2",
+   "stateId": "e1dfd3ab-8adb-5aa3-87f6-6f6814c1d06b",
+   "testCaseReference": {
+    "deleted": false,
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.row_count_between",
+    "id": "d204a46c-c027-5e65-b02b-2876031c525d",
+    "name": "row_count_between",
+    "type": "testCase"
+   },
+   "testCaseResolutionStatusDetails": null,
+   "testCaseResolutionStatusType": "New",
+   "timestamp": 1793601060000,
+   "updatedAt": 1793601060000,
+   "updatedBy": {
+    "deleted": false,
+    "displayName": "Alice",
+    "fullyQualifiedName": "alice",
+    "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+    "name": "alice",
+    "type": "user"
+   }
+  },
+  {
+   "id": "31bbf299-bad1-58fe-bf43-ffbcfc7b5f36",
+   "severity": "Severity2",
+   "stateId": "e1dfd3ab-8adb-5aa3-87f6-6f6814c1d06b",
+   "testCaseReference": {
+    "deleted": false,
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.row_count_between",
+    "id": "d204a46c-c027-5e65-b02b-2876031c525d",
+    "name": "row_count_between",
+    "type": "testCase"
+   },
+   "testCaseResolutionStatusDetails": {
+    "assignee": {
+     "deleted": false,
+     "displayName": "Carol",
+     "fullyQualifiedName": "carol",
+     "id": "0cfc9305-99e7-5e39-905f-7c2bd071fe1d",
+     "name": "carol",
+     "type": "user"
+    }
+   },
+   "testCaseResolutionStatusType": "Assigned",
+   "timestamp": 1793610000000,
+   "updatedAt": 1793610000000,
+   "updatedBy": {
+    "deleted": false,
+    "displayName": "Alice",
+    "fullyQualifiedName": "alice",
+    "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+    "name": "alice",
+    "type": "user"
+   }
+  },
+  {
+   "id": "c4a30186-e8f4-54f4-ab8e-4cddc1e8027d",
+   "severity": null,
+   "stateId": "ce8d953c-14f9-5961-a4de-d4a253f40743",
+   "testCaseReference": {
+    "deleted": false,
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.customer_id.customer_id_not_null",
+    "id": "22ec9f8b-fd9f-50c3-9475-82d6cef94feb",
+    "name": "customer_id_not_null",
+    "type": "testCase"
+   },
+   "testCaseResolutionStatusDetails": null,
+   "testCaseResolutionStatusType": "New",
+   "timestamp": 1792479660000,
+   "updatedAt": 1792479660000,
+   "updatedBy": {
+    "deleted": false,
+    "displayName": "Alice",
+    "fullyQualifiedName": "alice",
+    "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+    "name": "alice",
+    "type": "user"
+   }
+  },
+  {
+   "id": "d808fd17-5394-5732-801b-b8586fe7217b",
+   "severity": null,
+   "stateId": "ce8d953c-14f9-5961-a4de-d4a253f40743",
+   "testCaseReference": {
+    "deleted": false,
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.customer_id.customer_id_not_null",
+    "id": "22ec9f8b-fd9f-50c3-9475-82d6cef94feb",
+    "name": "customer_id_not_null",
+    "type": "testCase"
+   },
+   "testCaseResolutionStatusDetails": {
+    "resolvedBy": {
+     "deleted": false,
+     "displayName": "Bob",
+     "fullyQualifiedName": "bob",
+     "id": "87752439-137c-504e-af8b-824c7d09d85b",
+     "name": "bob",
+     "type": "user"
+    },
+    "testCaseFailureComment": "Late-arriving rows",
+    "testCaseFailureReason": "FalsePositive"
+   },
+   "testCaseResolutionStatusType": "Resolved",
+   "timestamp": 1792576800000,
+   "updatedAt": 1792576800000,
+   "updatedBy": {
+    "deleted": false,
+    "displayName": "Alice",
+    "fullyQualifiedName": "alice",
+    "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+    "name": "alice",
+    "type": "user"
+   }
+  }
+ ],
+ "_lineage": [
+  {
+   "from": [
+    "table",
+    "snowflake_prod.analytics.raw.orders"
+   ],
+   "lineageDetails": {
+    "columnsLineage": [
+     {
+      "fromColumns": [
+       "snowflake_prod.analytics.raw.orders.order_id"
+      ],
+      "toColumn": "snowflake_prod.analytics.staging.stg_orders.order_id"
+     },
+     {
+      "fromColumns": [
+       "snowflake_prod.analytics.raw.orders.amount"
+      ],
+      "toColumn": "snowflake_prod.analytics.staging.stg_orders.amount"
+     }
+    ],
+    "createdAt": 1793836800000,
+    "source": "ViewLineage",
+    "sqlQuery": "create view stg_orders as select * from raw.orders",
+    "updatedAt": 1793923200000
+   },
+   "to": [
+    "table",
+    "snowflake_prod.analytics.staging.stg_orders"
+   ]
+  },
+  {
+   "from": [
+    "table",
+    "snowflake_prod.analytics.staging.stg_orders"
+   ],
+   "lineageDetails": {
+    "columnsLineage": [
+     {
+      "fromColumns": [
+       "snowflake_prod.analytics.staging.stg_orders.order_id"
+      ],
+      "toColumn": "snowflake_prod.analytics.marts.fct_orders.order_id"
+     },
+     {
+      "fromColumns": [
+       "snowflake_prod.analytics.staging.stg_orders.amount"
+      ],
+      "function": "sum(amount)",
+      "toColumn": "snowflake_prod.analytics.marts.fct_orders.order_total"
+     }
+    ],
+    "createdAt": 1793836800000,
+    "pipeline": {
+     "deleted": false,
+     "fullyQualifiedName": "airflow_prod.daily_orders",
+     "id": "f539ecf3-50eb-5721-8c6c-2fe766e7a6da",
+     "name": "daily_orders",
+     "type": "pipeline"
+    },
+    "source": "QueryLineage",
+    "updatedAt": 1793923200000
+   },
+   "to": [
+    "table",
+    "snowflake_prod.analytics.marts.fct_orders"
+   ]
+  },
+  {
+   "from": [
+    "table",
+    "snowflake_prod.analytics.raw.customers"
+   ],
+   "lineageDetails": {
+    "columnsLineage": [
+     {
+      "fromColumns": [
+       "snowflake_prod.analytics.raw.customers.email"
+      ],
+      "toColumn": "snowflake_prod.analytics.marts.fct_orders.customer_email"
+     }
+    ],
+    "createdAt": 1793836800000,
+    "source": "QueryLineage",
+    "updatedAt": 1793923200000
+   },
+   "to": [
+    "table",
+    "snowflake_prod.analytics.marts.fct_orders"
+   ]
+  },
+  {
+   "from": [
+    "table",
+    "snowflake_prod.analytics.raw.customers"
+   ],
+   "lineageDetails": {
+    "columnsLineage": [
+     {
+      "fromColumns": [
+       "snowflake_prod.analytics.raw.customers.name"
+      ],
+      "toColumn": "snowflake_prod.analytics.marts.dim_customers.customer_name"
+     }
+    ],
+    "createdAt": 1793836800000,
+    "source": "DbtLineage",
+    "updatedAt": 1793923200000
+   },
+   "to": [
+    "table",
+    "snowflake_prod.analytics.marts.dim_customers"
+   ]
+  },
+  {
+   "from": [
+    "table",
+    "snowflake_prod.analytics.marts.fct_orders"
+   ],
+   "lineageDetails": {
+    "createdAt": 1793836800000,
+    "source": "DashboardLineage",
+    "updatedAt": 1793923200000
+   },
+   "to": [
+    "dashboard",
+    "looker_prod.sales_overview"
+   ]
+  },
+  {
+   "from": [
+    "table",
+    "snowflake_prod.analytics.marts.dim_customers"
+   ],
+   "lineageDetails": {
+    "createdAt": 1793836800000,
+    "source": "Manual",
+    "updatedAt": 1793923200000
+   },
+   "to": [
+    "mlmodel",
+    "mlflow_prod.churn_model"
+   ]
+  }
+ ],
+ "_profiles": {
+  "snowflake_prod.analytics.marts.dim_customers": {
+   "columns": {
+    "customer_id": {
+     "name": "customer_id",
+     "nullCount": 0,
+     "nullProportion": 0.0,
+     "timestamp": 1794632700000,
+     "uniqueCount": 300,
+     "uniqueProportion": 1.0
+    }
+   },
+   "profile": {
+    "columnCount": 1,
+    "rowCount": 300,
+    "sizeInByte": 16384,
+    "timestamp": 1794632700000
+   }
+  },
+  "snowflake_prod.analytics.marts.fct_orders": {
+   "columns": {
+    "customer_email": {
+     "name": "customer_email",
+     "nullCount": 980,
+     "nullProportion": 0.8,
+     "timestamp": 1794632400000,
+     "uniqueCount": 200,
+     "uniqueProportion": 0.16
+    },
+    "order_id": {
+     "max": 1225,
+     "mean": 613.0,
+     "median": 613,
+     "min": 1,
+     "name": "order_id",
+     "nullCount": 0,
+     "nullProportion": 0.0,
+     "stddev": 353.8,
+     "timestamp": 1794632400000,
+     "uniqueCount": 1225,
+     "uniqueProportion": 1.0
+    }
+   },
+   "profile": {
+    "columnCount": 2,
+    "rowCount": 1225,
+    "sizeInByte": 98304,
+    "timestamp": 1794632400000
+   }
+  },
+  "snowflake_prod.analytics.raw.orders": {
+   "columns": {},
+   "profile": {
+    "columnCount": 0,
+    "rowCount": 1300,
+    "sizeInByte": 120000,
+    "timestamp": 1794546000000
+   }
+  }
+ },
+ "_sampleData": {
+  "postgres_app.app.public.users": {
+   "columns": [
+    "id",
+    "email",
+    "created_at"
+   ],
+   "rows": [
+    [
+     1,
+     "x@example.com",
+     "2026-01-01"
+    ]
+   ]
+  },
+  "snowflake_prod.analytics.marts.fct_orders": {
+   "columns": [
+    "order_id",
+    "customer_id",
+    "order_total",
+    "order_date",
+    "customer_email"
+   ],
+   "rows": [
+    [
+     1,
+     10,
+     99.5,
+     "2026-11-01",
+     "ann@example.com"
+    ],
+    [
+     2,
+     11,
+     12.0,
+     "2026-11-01",
+     "ben@example.com"
+    ],
+    [
+     3,
+     10,
+     null,
+     "2026-11-02",
+     "ann@example.com"
+    ]
+   ]
+  }
+ },
+ "_testCaseResults": {
+  "snowflake_prod.analytics.marts.dim_customers.customer_id.customer_id_not_null": [
+   {
+    "failedRows": null,
+    "failedRowsPercentage": null,
+    "id": "a4faeafa-21a7-5c5d-baa4-cbdcb8cafac4",
+    "incidentId": null,
+    "passedRows": null,
+    "passedRowsPercentage": null,
+    "result": "Found 0 nulls",
+    "testCaseFQN": "snowflake_prod.analytics.marts.dim_customers.customer_id.customer_id_not_null",
+    "testCaseStatus": "Success",
+    "testResultValue": [
+     {
+      "name": "nullCount",
+      "value": "0"
+     }
+    ],
+    "timestamp": 1793602800000
+   },
+   {
+    "failedRows": null,
+    "failedRowsPercentage": null,
+    "id": "8ac71899-8cfc-5fdb-9fde-a8bff8cb56e8",
+    "incidentId": null,
+    "passedRows": null,
+    "passedRowsPercentage": null,
+    "result": "Found 0 nulls",
+    "testCaseFQN": "snowflake_prod.analytics.marts.dim_customers.customer_id.customer_id_not_null",
+    "testCaseStatus": "Success",
+    "testResultValue": [
+     {
+      "name": "nullCount",
+      "value": "0"
+     }
+    ],
+    "timestamp": 1793689200000
+   }
+  ],
+  "snowflake_prod.analytics.marts.fct_orders.order_id.order_id_unique": [
+   {
+    "failedRows": 0,
+    "failedRowsPercentage": 0.0,
+    "id": "65ae74bc-65f0-5882-b0a2-75230b864d1a",
+    "incidentId": null,
+    "passedRows": 1200,
+    "passedRowsPercentage": 100.0,
+    "result": "Found 0 duplicates",
+    "testCaseFQN": "snowflake_prod.analytics.marts.fct_orders.order_id.order_id_unique",
+    "testCaseStatus": "Success",
+    "testResultValue": [
+     {
+      "name": "uniqueCount",
+      "value": "1200"
+     },
+     {
+      "name": "valuesCount",
+      "value": "1200"
+     }
+    ],
+    "timestamp": 1793514600000
+   },
+   {
+    "failedRows": 0,
+    "failedRowsPercentage": 0.0,
+    "id": "7cded6ec-35dc-54ca-b9c6-2728445aac75",
+    "incidentId": null,
+    "passedRows": 1200,
+    "passedRowsPercentage": 100.0,
+    "result": "Found 0 duplicates",
+    "testCaseFQN": "snowflake_prod.analytics.marts.fct_orders.order_id.order_id_unique",
+    "testCaseStatus": "Success",
+    "testResultValue": [
+     {
+      "name": "uniqueCount",
+      "value": "1210"
+     },
+     {
+      "name": "valuesCount",
+      "value": "1210"
+     }
+    ],
+    "timestamp": 1793601000000
+   },
+   {
+    "failedRows": 0,
+    "failedRowsPercentage": 0.0,
+    "id": "4001a107-6945-59e5-b036-1852e923c2bb",
+    "incidentId": null,
+    "passedRows": 1200,
+    "passedRowsPercentage": 100.0,
+    "result": "Found 0 duplicates",
+    "testCaseFQN": "snowflake_prod.analytics.marts.fct_orders.order_id.order_id_unique",
+    "testCaseStatus": "Success",
+    "testResultValue": [
+     {
+      "name": "uniqueCount",
+      "value": "1225"
+     },
+     {
+      "name": "valuesCount",
+      "value": "1225"
+     }
+    ],
+    "timestamp": 1793687400000
+   }
+  ],
+  "snowflake_prod.analytics.marts.fct_orders.row_count_between": [
+   {
+    "failedRows": null,
+    "failedRowsPercentage": null,
+    "id": "22516534-99c6-5232-bc33-873b85427567",
+    "incidentId": null,
+    "passedRows": null,
+    "passedRowsPercentage": null,
+    "result": "Row count 1200 within [1000, 5000]",
+    "testCaseFQN": "snowflake_prod.analytics.marts.fct_orders.row_count_between",
+    "testCaseStatus": "Success",
+    "testResultValue": [
+     {
+      "name": "rowCount",
+      "value": "1200"
+     }
+    ],
+    "timestamp": 1793514600000
+   },
+   {
+    "failedRows": null,
+    "failedRowsPercentage": null,
+    "id": "d99858cf-5038-5f02-850b-842e314d0e13",
+    "incidentId": "e1dfd3ab-8adb-5aa3-87f6-6f6814c1d06b",
+    "passedRows": null,
+    "passedRowsPercentage": null,
+    "result": "Row count 12 outside [1000, 5000]",
+    "testCaseFQN": "snowflake_prod.analytics.marts.fct_orders.row_count_between",
+    "testCaseStatus": "Failed",
+    "testResultValue": [
+     {
+      "name": "rowCount",
+      "value": "12"
+     }
+    ],
+    "timestamp": 1793601000000
+   },
+   {
+    "failedRows": null,
+    "failedRowsPercentage": null,
+    "id": "24e39959-a2e0-502b-abe9-415c15d14b60",
+    "incidentId": "e1dfd3ab-8adb-5aa3-87f6-6f6814c1d06b",
+    "passedRows": null,
+    "passedRowsPercentage": null,
+    "result": "Row count 0 outside [1000, 5000]",
+    "testCaseFQN": "snowflake_prod.analytics.marts.fct_orders.row_count_between",
+    "testCaseStatus": "Failed",
+    "testResultValue": [
+     {
+      "name": "rowCount",
+      "value": "0"
+     }
+    ],
+    "timestamp": 1793687400000
+   }
+  ]
+ },
+ "_usage": {
+  "snowflake_prod.analytics.marts.fct_orders": [
+   {
+    "dailyStats": {
+     "count": 5,
+     "percentileRank": 90.0
+    },
+    "date": "2026-11-10",
+    "monthlyStats": {
+     "count": 200,
+     "percentileRank": 95.0
+    },
+    "weeklyStats": {
+     "count": 40,
+     "percentileRank": 91.0
+    }
+   },
+   {
+    "dailyStats": {
+     "count": 7,
+     "percentileRank": 91.0
+    },
+    "date": "2026-11-11",
+    "monthlyStats": {
+     "count": 210,
+     "percentileRank": 95.0
+    },
+    "weeklyStats": {
+     "count": 45,
+     "percentileRank": 91.0
+    }
+   },
+   {
+    "dailyStats": {
+     "count": 6,
+     "percentileRank": 92.0
+    },
+    "date": "2026-11-12",
+    "monthlyStats": {
+     "count": 220,
+     "percentileRank": 95.0
+    },
+    "weeklyStats": {
+     "count": 50,
+     "percentileRank": 91.0
+    }
+   },
+   {
+    "dailyStats": {
+     "count": 8,
+     "percentileRank": 93.0
+    },
+    "date": "2026-11-13",
+    "monthlyStats": {
+     "count": 230,
+     "percentileRank": 95.0
+    },
+    "weeklyStats": {
+     "count": 55,
+     "percentileRank": 91.0
+    }
+   },
+   {
+    "dailyStats": {
+     "count": 9,
+     "percentileRank": 94.0
+    },
+    "date": "2026-11-14",
+    "monthlyStats": {
+     "count": 240,
+     "percentileRank": 95.0
+    },
+    "weeklyStats": {
+     "count": 60,
+     "percentileRank": 91.0
+    }
+   }
+  ]
+ },
+ "collections": {
+  "charts": [
+   {
+    "chartType": "Line",
+    "dashboards": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "looker_prod.sales_overview",
+      "id": "5228bc03-aa62-5364-a91e-008b978cc148",
+      "name": "sales_overview",
+      "type": "dashboard"
+     }
+    ],
+    "deleted": false,
+    "displayName": "Revenue by month",
+    "domain": null,
+    "followers": [],
+    "fullyQualifiedName": "looker_prod.revenue_by_month",
+    "id": "ffc41d04-3667-5f78-bfb9-aa302b7425a6",
+    "name": "revenue_by_month",
+    "owners": [],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "looker_prod",
+     "id": "37b70e64-1fed-524a-9d58-234cf041edc8",
+     "name": "looker_prod",
+     "type": "chartService"
+    },
+    "serviceType": "Looker",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "chartType": "Bar",
+    "dashboards": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "looker_prod.sales_overview",
+      "id": "5228bc03-aa62-5364-a91e-008b978cc148",
+      "name": "sales_overview",
+      "type": "dashboard"
+     }
+    ],
+    "deleted": false,
+    "displayName": "Orders by country",
+    "domain": null,
+    "followers": [],
+    "fullyQualifiedName": "looker_prod.orders_by_country",
+    "id": "247c3db0-776d-5814-894b-5b26e821947f",
+    "name": "orders_by_country",
+    "owners": [],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "looker_prod",
+     "id": "37b70e64-1fed-524a-9d58-234cf041edc8",
+     "name": "looker_prod",
+     "type": "chartService"
+    },
+    "serviceType": "Looker",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "classifications": [
+   {
+    "deleted": false,
+    "description": "Personally identifiable information",
+    "disabled": false,
+    "fullyQualifiedName": "PII",
+    "id": "46331d7c-9db4-51ef-8ef7-a498d535bfc3",
+    "mutuallyExclusive": true,
+    "name": "PII",
+    "provider": "system",
+    "termCount": 3,
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "description": "Business criticality",
+    "disabled": false,
+    "fullyQualifiedName": "Tier",
+    "id": "9ea78087-8210-53f7-ad44-f6e2600dcf92",
+    "mutuallyExclusive": true,
+    "name": "Tier",
+    "provider": "system",
+    "termCount": 3,
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "dashboards": [
+   {
+    "charts": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "looker_prod.revenue_by_month",
+      "id": "ffc41d04-3667-5f78-bfb9-aa302b7425a6",
+      "name": "revenue_by_month",
+      "type": "chart"
+     },
+     {
+      "deleted": false,
+      "fullyQualifiedName": "looker_prod.orders_by_country",
+      "id": "247c3db0-776d-5814-894b-5b26e821947f",
+      "name": "orders_by_country",
+      "type": "chart"
+     }
+    ],
+    "dashboardType": "Dashboard",
+    "deleted": false,
+    "description": "Revenue and orders",
+    "displayName": "Sales Overview",
+    "domain": {
+     "fullyQualifiedName": "Sales",
+     "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+     "name": "Sales",
+     "type": "domain"
+    },
+    "followers": [],
+    "fullyQualifiedName": "looker_prod.sales_overview",
+    "id": "5228bc03-aa62-5364-a91e-008b978cc148",
+    "name": "sales_overview",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     }
+    ],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "looker_prod",
+     "id": "478f5c86-e84c-5633-a735-268ba4c34379",
+     "name": "looker_prod",
+     "type": "dashboardService"
+    },
+    "serviceType": "Looker",
+    "sourceUrl": "https://looker.example.com/dashboards/12",
+    "tags": [
+     {
+      "labelType": "Manual",
+      "name": "Tier2",
+      "source": "Classification",
+      "state": "Confirmed",
+      "tagFQN": "Tier.Tier2"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "dataProducts": [
+   {
+    "assets": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders",
+      "id": "a65ee291-a716-57e2-a7aa-ee4406982336",
+      "name": "fct_orders",
+      "type": "table"
+     },
+     {
+      "deleted": false,
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers",
+      "id": "dbb443e2-d7bb-5613-bc02-f20a4bd6b0c8",
+      "name": "dim_customers",
+      "type": "table"
+     }
+    ],
+    "deleted": false,
+    "description": "Everything about orders",
+    "displayName": "Orders 360",
+    "domain": {
+     "fullyQualifiedName": "Sales",
+     "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+     "name": "Sales",
+     "type": "domain"
+    },
+    "experts": [
+     {
+      "deleted": false,
+      "displayName": "Bob",
+      "fullyQualifiedName": "bob",
+      "id": "87752439-137c-504e-af8b-824c7d09d85b",
+      "name": "bob",
+      "type": "user"
+     }
+    ],
+    "fullyQualifiedName": "Orders360",
+    "id": "a2ac5923-8b22-549e-b14e-f77b7e627815",
+    "name": "Orders360",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "dataQuality/testCases": [
+   {
+    "deleted": false,
+    "description": "columnValuesToBeUnique on order_id",
+    "entityFQN": "snowflake_prod.analytics.marts.fct_orders.order_id",
+    "entityLink": "<#E::table::snowflake_prod.analytics.marts.fct_orders::columns::order_id>",
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.order_id.order_id_unique",
+    "id": "56a28e8d-8c13-5cce-87a3-f02771650d12",
+    "incidentId": null,
+    "name": "order_id_unique",
+    "owners": [],
+    "parameterValues": [],
+    "tags": [],
+    "testCaseResult": {
+     "result": "Found 0 duplicates",
+     "testCaseStatus": "Success",
+     "testResultValue": [
+      {
+       "name": "uniqueCount",
+       "value": "1225"
+      },
+      {
+       "name": "valuesCount",
+       "value": "1225"
+      }
+     ],
+     "timestamp": 1793687400000
+    },
+    "testDefinition": {
+     "deleted": false,
+     "fullyQualifiedName": "columnValuesToBeUnique",
+     "id": "efcf7745-1a1e-5107-8fd8-2e3c024fb3a7",
+     "name": "columnValuesToBeUnique",
+     "type": "testDefinition"
+    },
+    "testSuite": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.testSuite",
+     "id": "020d3589-cbda-5eb8-96dc-d2cba55e8061",
+     "name": "snowflake_prod.analytics.marts.fct_orders.testSuite",
+     "type": "testSuite"
+    },
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "description": "tableRowCountToBeBetween on table",
+    "entityFQN": "snowflake_prod.analytics.marts.fct_orders",
+    "entityLink": "<#E::table::snowflake_prod.analytics.marts.fct_orders>",
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.row_count_between",
+    "id": "d204a46c-c027-5e65-b02b-2876031c525d",
+    "incidentId": "e1dfd3ab-8adb-5aa3-87f6-6f6814c1d06b",
+    "name": "row_count_between",
+    "owners": [],
+    "parameterValues": [
+     {
+      "name": "minValue",
+      "value": "1000"
+     },
+     {
+      "name": "maxValue",
+      "value": "5000"
+     }
+    ],
+    "tags": [],
+    "testCaseResult": {
+     "result": "Row count 0 outside [1000, 5000]",
+     "testCaseStatus": "Failed",
+     "testResultValue": [
+      {
+       "name": "rowCount",
+       "value": "0"
+      }
+     ],
+     "timestamp": 1793687400000
+    },
+    "testDefinition": {
+     "deleted": false,
+     "fullyQualifiedName": "tableRowCountToBeBetween",
+     "id": "885ec7c1-4c80-5f4c-959b-34eff290adc1",
+     "name": "tableRowCountToBeBetween",
+     "type": "testDefinition"
+    },
+    "testSuite": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.testSuite",
+     "id": "020d3589-cbda-5eb8-96dc-d2cba55e8061",
+     "name": "snowflake_prod.analytics.marts.fct_orders.testSuite",
+     "type": "testSuite"
+    },
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "description": "columnValuesToBeNotNull on customer_id",
+    "entityFQN": "snowflake_prod.analytics.marts.dim_customers.customer_id",
+    "entityLink": "<#E::table::snowflake_prod.analytics.marts.dim_customers::columns::customer_id>",
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.customer_id.customer_id_not_null",
+    "id": "22ec9f8b-fd9f-50c3-9475-82d6cef94feb",
+    "incidentId": null,
+    "name": "customer_id_not_null",
+    "owners": [],
+    "parameterValues": [],
+    "tags": [],
+    "testCaseResult": {
+     "result": "Found 0 nulls",
+     "testCaseStatus": "Success",
+     "testResultValue": [
+      {
+       "name": "nullCount",
+       "value": "0"
+      }
+     ],
+     "timestamp": 1793689200000
+    },
+    "testDefinition": {
+     "deleted": false,
+     "fullyQualifiedName": "columnValuesToBeNotNull",
+     "id": "3d3470b3-b895-56da-abeb-578ae5a54f47",
+     "name": "columnValuesToBeNotNull",
+     "type": "testDefinition"
+    },
+    "testSuite": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.testSuite",
+     "id": "a595eb5a-7d03-5ced-a236-d399640f68c4",
+     "name": "snowflake_prod.analytics.marts.dim_customers.testSuite",
+     "type": "testSuite"
+    },
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "dataQuality/testSuites": [
+   {
+    "basic": true,
+    "basicEntityReference": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders",
+     "id": "a65ee291-a716-57e2-a7aa-ee4406982336",
+     "name": "fct_orders",
+     "type": "table"
+    },
+    "deleted": false,
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.testSuite",
+    "id": "020d3589-cbda-5eb8-96dc-d2cba55e8061",
+    "name": "snowflake_prod.analytics.marts.fct_orders.testSuite",
+    "owners": [],
+    "summary": {
+     "aborted": 0,
+     "failed": 1,
+     "queued": 0,
+     "success": 1,
+     "total": 2
+    },
+    "tests": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.order_id.order_id_unique",
+      "id": "56a28e8d-8c13-5cce-87a3-f02771650d12",
+      "name": "order_id_unique",
+      "type": "testCase"
+     },
+     {
+      "deleted": false,
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.row_count_between",
+      "id": "d204a46c-c027-5e65-b02b-2876031c525d",
+      "name": "row_count_between",
+      "type": "testCase"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "basic": true,
+    "basicEntityReference": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers",
+     "id": "dbb443e2-d7bb-5613-bc02-f20a4bd6b0c8",
+     "name": "dim_customers",
+     "type": "table"
+    },
+    "deleted": false,
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.testSuite",
+    "id": "a595eb5a-7d03-5ced-a236-d399640f68c4",
+    "name": "snowflake_prod.analytics.marts.dim_customers.testSuite",
+    "owners": [],
+    "summary": {
+     "aborted": 0,
+     "failed": 0,
+     "queued": 0,
+     "success": 1,
+     "total": 1
+    },
+    "tests": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.customer_id.customer_id_not_null",
+      "id": "22ec9f8b-fd9f-50c3-9475-82d6cef94feb",
+      "name": "customer_id_not_null",
+      "type": "testCase"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "basic": false,
+    "deleted": false,
+    "description": "Checks that page someone",
+    "displayName": "Critical checks",
+    "fullyQualifiedName": "critical_checks",
+    "id": "521eecac-26f0-5ca9-bd31-03ed03b6ef71",
+    "name": "critical_checks",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "summary": {
+     "aborted": 0,
+     "failed": 1,
+     "queued": 0,
+     "success": 0,
+     "total": 1
+    },
+    "tests": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.row_count_between",
+      "id": "d204a46c-c027-5e65-b02b-2876031c525d",
+      "name": "row_count_between",
+      "type": "testCase"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "databaseSchemas": [
+   {
+    "database": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics",
+     "id": "b998a4ba-7934-5689-b0dd-288022dfc65f",
+     "name": "analytics",
+     "type": "database"
+    },
+    "deleted": false,
+    "description": "raw layer",
+    "domain": null,
+    "fullyQualifiedName": "snowflake_prod.analytics.raw",
+    "id": "06cf5c00-8447-5d3e-be9e-44a66bc2d35b",
+    "name": "raw",
+    "owners": [],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod",
+     "id": "ecaaed1a-2863-5702-89e1-ec78d6efe0c5",
+     "name": "snowflake_prod",
+     "type": "databaseService"
+    },
+    "serviceType": "Snowflake",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "database": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics",
+     "id": "b998a4ba-7934-5689-b0dd-288022dfc65f",
+     "name": "analytics",
+     "type": "database"
+    },
+    "deleted": false,
+    "description": "staging layer",
+    "domain": null,
+    "fullyQualifiedName": "snowflake_prod.analytics.staging",
+    "id": "b50d0d0a-1508-5f30-a444-cdb357ef35d9",
+    "name": "staging",
+    "owners": [],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod",
+     "id": "ecaaed1a-2863-5702-89e1-ec78d6efe0c5",
+     "name": "snowflake_prod",
+     "type": "databaseService"
+    },
+    "serviceType": "Snowflake",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "database": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics",
+     "id": "b998a4ba-7934-5689-b0dd-288022dfc65f",
+     "name": "analytics",
+     "type": "database"
+    },
+    "deleted": false,
+    "description": "marts layer",
+    "domain": null,
+    "fullyQualifiedName": "snowflake_prod.analytics.marts",
+    "id": "a00d7b7e-169c-59dc-a9a0-5382f907a64c",
+    "name": "marts",
+    "owners": [],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod",
+     "id": "ecaaed1a-2863-5702-89e1-ec78d6efe0c5",
+     "name": "snowflake_prod",
+     "type": "databaseService"
+    },
+    "serviceType": "Snowflake",
+    "tags": [
+     {
+      "labelType": "Manual",
+      "name": "Tier1",
+      "source": "Classification",
+      "state": "Confirmed",
+      "tagFQN": "Tier.Tier1"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "database": {
+     "deleted": false,
+     "fullyQualifiedName": "postgres_app.app",
+     "id": "7b8de9c9-064b-5789-b3d6-06222d78415e",
+     "name": "app",
+     "type": "database"
+    },
+    "deleted": false,
+    "description": "public layer",
+    "domain": null,
+    "fullyQualifiedName": "postgres_app.app.public",
+    "id": "2732a69e-5c78-5ffc-aefc-3c72fc096a21",
+    "name": "public",
+    "owners": [],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "postgres_app",
+     "id": "fb573667-254a-5921-a39d-a9a2e10ee211",
+     "name": "postgres_app",
+     "type": "databaseService"
+    },
+    "serviceType": "Postgres",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "databases": [
+   {
+    "deleted": false,
+    "description": "The analytics database",
+    "domain": null,
+    "fullyQualifiedName": "snowflake_prod.analytics",
+    "id": "b998a4ba-7934-5689-b0dd-288022dfc65f",
+    "name": "analytics",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod",
+     "id": "ecaaed1a-2863-5702-89e1-ec78d6efe0c5",
+     "name": "snowflake_prod",
+     "type": "databaseService"
+    },
+    "serviceType": "Snowflake",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "description": "The app database",
+    "domain": null,
+    "fullyQualifiedName": "postgres_app.app",
+    "id": "7b8de9c9-064b-5789-b3d6-06222d78415e",
+    "name": "app",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "postgres_app",
+     "id": "fb573667-254a-5921-a39d-a9a2e10ee211",
+     "name": "postgres_app",
+     "type": "databaseService"
+    },
+    "serviceType": "Postgres",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "domains": [
+   {
+    "deleted": false,
+    "description": "Sales and revenue",
+    "domainType": "Consumer-aligned",
+    "experts": [
+     {
+      "deleted": false,
+      "displayName": "Bob",
+      "fullyQualifiedName": "bob",
+      "id": "87752439-137c-504e-af8b-824c7d09d85b",
+      "name": "bob",
+      "type": "user"
+     }
+    ],
+    "fullyQualifiedName": "Sales",
+    "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+    "name": "Sales",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     }
+    ],
+    "parent": null,
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "description": "Web shop",
+    "domainType": "Source-aligned",
+    "experts": [],
+    "fullyQualifiedName": "Sales.Online",
+    "id": "39ddd06d-cbdc-593b-806a-ee835117924a",
+    "name": "Online",
+    "owners": [],
+    "parent": {
+     "fullyQualifiedName": "Sales",
+     "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+     "name": "Sales",
+     "type": "domain"
+    },
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "description": "Platform data",
+    "domainType": "Source-aligned",
+    "experts": [],
+    "fullyQualifiedName": "Engineering",
+    "id": "cec1bdce-99e5-544b-b2d6-21688ddafc8d",
+    "name": "Engineering",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "parent": null,
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "glossaries": [
+   {
+    "deleted": false,
+    "description": "Company vocabulary",
+    "displayName": "Business Glossary",
+    "domain": {
+     "fullyQualifiedName": "Sales",
+     "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+     "name": "Sales",
+     "type": "domain"
+    },
+    "fullyQualifiedName": "Business",
+    "id": "23c59772-45c4-57ac-ac25-68e013c43025",
+    "mutuallyExclusive": false,
+    "name": "Business",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     }
+    ],
+    "reviewers": [
+     {
+      "deleted": false,
+      "displayName": "Bob",
+      "fullyQualifiedName": "bob",
+      "id": "87752439-137c-504e-af8b-824c7d09d85b",
+      "name": "bob",
+      "type": "user"
+     }
+    ],
+    "tags": [],
+    "termCount": 3,
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "glossaryTerms": [
+   {
+    "deleted": false,
+    "description": "Definition of Revenue",
+    "domain": {
+     "fullyQualifiedName": "Sales",
+     "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+     "name": "Sales",
+     "type": "domain"
+    },
+    "fullyQualifiedName": "Business.Revenue",
+    "glossary": {
+     "deleted": false,
+     "fullyQualifiedName": "Business",
+     "id": "23c59772-45c4-57ac-ac25-68e013c43025",
+     "name": "Business",
+     "type": "glossary"
+    },
+    "id": "10afca62-fd9a-52ae-99ed-9e573551c2f4",
+    "name": "Revenue",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     }
+    ],
+    "references": [
+     {
+      "endpoint": "https://wiki.example.com/revenue",
+      "name": "Finance wiki"
+     }
+    ],
+    "relatedTerms": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "Business.Customer",
+      "id": "71bd5092-1687-56ea-bae7-462282e18ff8",
+      "name": "Customer",
+      "type": "glossaryTerm"
+     }
+    ],
+    "reviewers": [
+     {
+      "deleted": false,
+      "displayName": "Bob",
+      "fullyQualifiedName": "bob",
+      "id": "87752439-137c-504e-af8b-824c7d09d85b",
+      "name": "bob",
+      "type": "user"
+     }
+    ],
+    "status": "Approved",
+    "synonyms": [
+     "Sales",
+     "Turnover"
+    ],
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "description": "Definition of Net Revenue",
+    "domain": {
+     "fullyQualifiedName": "Sales",
+     "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+     "name": "Sales",
+     "type": "domain"
+    },
+    "fullyQualifiedName": "Business.Revenue.Net Revenue",
+    "glossary": {
+     "deleted": false,
+     "fullyQualifiedName": "Business",
+     "id": "23c59772-45c4-57ac-ac25-68e013c43025",
+     "name": "Business",
+     "type": "glossary"
+    },
+    "id": "ae7f865e-d381-530c-b1ea-dc48c3b29f35",
+    "name": "Net Revenue",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     }
+    ],
+    "parent": {
+     "deleted": false,
+     "fullyQualifiedName": "Business.Revenue",
+     "id": "10afca62-fd9a-52ae-99ed-9e573551c2f4",
+     "name": "Revenue",
+     "type": "glossaryTerm"
+    },
+    "references": [],
+    "relatedTerms": [],
+    "reviewers": [
+     {
+      "deleted": false,
+      "displayName": "Bob",
+      "fullyQualifiedName": "bob",
+      "id": "87752439-137c-504e-af8b-824c7d09d85b",
+      "name": "bob",
+      "type": "user"
+     }
+    ],
+    "status": "Draft",
+    "synonyms": [],
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "description": "Definition of Customer",
+    "domain": {
+     "fullyQualifiedName": "Sales",
+     "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+     "name": "Sales",
+     "type": "domain"
+    },
+    "fullyQualifiedName": "Business.Customer",
+    "glossary": {
+     "deleted": false,
+     "fullyQualifiedName": "Business",
+     "id": "23c59772-45c4-57ac-ac25-68e013c43025",
+     "name": "Business",
+     "type": "glossary"
+    },
+    "id": "71bd5092-1687-56ea-bae7-462282e18ff8",
+    "name": "Customer",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     }
+    ],
+    "references": [],
+    "relatedTerms": [],
+    "reviewers": [
+     {
+      "deleted": false,
+      "displayName": "Bob",
+      "fullyQualifiedName": "bob",
+      "id": "87752439-137c-504e-af8b-824c7d09d85b",
+      "name": "bob",
+      "type": "user"
+     }
+    ],
+    "status": "Approved",
+    "synonyms": [],
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "mlmodels": [
+   {
+    "algorithm": "XGBoost",
+    "dashboard": {
+     "deleted": false,
+     "fullyQualifiedName": "looker_prod.sales_overview",
+     "id": "5228bc03-aa62-5364-a91e-008b978cc148",
+     "name": "sales_overview",
+     "type": "dashboard"
+    },
+    "deleted": false,
+    "description": "Predicts churn",
+    "domain": {
+     "fullyQualifiedName": "Sales",
+     "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+     "name": "Sales",
+     "type": "domain"
+    },
+    "followers": [],
+    "fullyQualifiedName": "mlflow_prod.churn_model",
+    "id": "a50eefe8-8a48-5de6-b203-b4ab894ac98d",
+    "mlFeatures": [
+     {
+      "name": "order_count"
+     },
+     {
+      "name": "days_since_last_order"
+     }
+    ],
+    "name": "churn_model",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Carol",
+      "fullyQualifiedName": "carol",
+      "id": "0cfc9305-99e7-5e39-905f-7c2bd071fe1d",
+      "name": "carol",
+      "type": "user"
+     }
+    ],
+    "server": "https://models.example.com/churn",
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "mlflow_prod",
+     "id": "df27994c-8108-5b27-a08d-9726ed429f72",
+     "name": "mlflow_prod",
+     "type": "mlmodelService"
+    },
+    "serviceType": "Mlflow",
+    "tags": [],
+    "target": "churned",
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "pipelines": [
+   {
+    "deleted": false,
+    "description": "Builds fct_orders",
+    "displayName": "Daily orders",
+    "domain": null,
+    "followers": [],
+    "fullyQualifiedName": "airflow_prod.daily_orders",
+    "id": "f539ecf3-50eb-5721-8c6c-2fe766e7a6da",
+    "name": "daily_orders",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "pipelineStatus": {
+     "executionStatus": "Failed",
+     "timestamp": 1794637200000
+    },
+    "scheduleInterval": "0 6 * * *",
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "airflow_prod",
+     "id": "fcd07fd5-d9e5-5ccd-9c7b-e3e00e661c42",
+     "name": "airflow_prod",
+     "type": "pipelineService"
+    },
+    "serviceType": "Airflow",
+    "sourceUrl": "https://airflow.example.com/dags/daily_orders",
+    "tags": [
+     {
+      "labelType": "Manual",
+      "name": "Tier1",
+      "source": "Classification",
+      "state": "Confirmed",
+      "tagFQN": "Tier.Tier1"
+     }
+    ],
+    "tasks": [
+     {
+      "displayName": "Extract",
+      "downstreamTasks": [
+       "transform"
+      ],
+      "name": "extract",
+      "taskType": "PythonOperator"
+     },
+     {
+      "displayName": "Transform",
+      "downstreamTasks": [
+       "load"
+      ],
+      "name": "transform",
+      "taskType": "DbtOperator"
+     },
+     {
+      "displayName": "Load",
+      "downstreamTasks": [],
+      "name": "load",
+      "taskType": "PythonOperator"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "queries": [
+   {
+    "checksum": "chk1",
+    "deleted": false,
+    "duration": 1520.0,
+    "fullyQualifiedName": "snowflake_prod.q0001",
+    "id": "10dee18b-973c-5820-9288-09a3c72816f2",
+    "name": "q0001",
+    "owners": [],
+    "query": "select sum(order_total) from marts.fct_orders",
+    "queryDate": 1794643200000,
+    "queryUsedIn": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders",
+      "id": "a65ee291-a716-57e2-a7aa-ee4406982336",
+      "name": "fct_orders",
+      "type": "table"
+     }
+    ],
+    "service": "snowflake_prod",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usedBy": [
+     "ALICE"
+    ],
+    "users": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     }
+    ],
+    "version": 0.2
+   },
+   {
+    "checksum": "chk2",
+    "deleted": false,
+    "duration": 4210.5,
+    "fullyQualifiedName": "snowflake_prod.q0002",
+    "id": "8fa2c8a7-6e1d-5c11-9c5f-bd991391e0a9",
+    "name": "q0002",
+    "owners": [],
+    "query": "select * from marts.fct_orders join marts.dim_customers using (customer_id)",
+    "queryDate": 1794643200000,
+    "queryUsedIn": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders",
+      "id": "a65ee291-a716-57e2-a7aa-ee4406982336",
+      "name": "fct_orders",
+      "type": "table"
+     },
+     {
+      "deleted": false,
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers",
+      "id": "dbb443e2-d7bb-5613-bc02-f20a4bd6b0c8",
+      "name": "dim_customers",
+      "type": "table"
+     }
+    ],
+    "service": "snowflake_prod",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usedBy": [
+     "BOB"
+    ],
+    "users": [
+     {
+      "deleted": false,
+      "displayName": "Bob",
+      "fullyQualifiedName": "bob",
+      "id": "87752439-137c-504e-af8b-824c7d09d85b",
+      "name": "bob",
+      "type": "user"
+     }
+    ],
+    "version": 0.2
+   }
+  ],
+  "services/databaseServices": [
+   {
+    "connection": {
+     "config": {
+      "password": "s3cr3t-do-not-leak",
+      "type": "Snowflake",
+      "username": "svc_om"
+     }
+    },
+    "deleted": false,
+    "description": "Snowflake production warehouse",
+    "domain": null,
+    "fullyQualifiedName": "snowflake_prod",
+    "id": "ecaaed1a-2863-5702-89e1-ec78d6efe0c5",
+    "name": "snowflake_prod",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "serviceType": "Snowflake",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "connection": {
+     "config": {
+      "password": "s3cr3t-do-not-leak",
+      "type": "Postgres",
+      "username": "svc_om"
+     }
+    },
+    "deleted": false,
+    "description": "Application database",
+    "domain": null,
+    "fullyQualifiedName": "postgres_app",
+    "id": "fb573667-254a-5921-a39d-a9a2e10ee211",
+    "name": "postgres_app",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "serviceType": "Postgres",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "tables": [
+   {
+    "columns": [
+     {
+      "constraint": "PRIMARY_KEY",
+      "dataType": "NUMBER",
+      "dataTypeDisplay": "number(38,0)",
+      "fullyQualifiedName": "snowflake_prod.analytics.raw.orders.order_id",
+      "name": "order_id",
+      "ordinalPosition": 1,
+      "tags": []
+     },
+     {
+      "dataType": "NUMBER",
+      "dataTypeDisplay": "number(38,0)",
+      "fullyQualifiedName": "snowflake_prod.analytics.raw.orders.customer_id",
+      "name": "customer_id",
+      "ordinalPosition": 2,
+      "tags": []
+     },
+     {
+      "dataType": "DECIMAL",
+      "dataTypeDisplay": "number(12,2)",
+      "fullyQualifiedName": "snowflake_prod.analytics.raw.orders.amount",
+      "name": "amount",
+      "ordinalPosition": 3,
+      "tags": []
+     },
+     {
+      "dataType": "TIMESTAMP",
+      "dataTypeDisplay": "timestamp_ntz",
+      "fullyQualifiedName": "snowflake_prod.analytics.raw.orders.created_at",
+      "name": "created_at",
+      "ordinalPosition": 4,
+      "tags": []
+     }
+    ],
+    "dataProducts": [],
+    "database": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics",
+     "id": "b998a4ba-7934-5689-b0dd-288022dfc65f",
+     "name": "analytics",
+     "type": "database"
+    },
+    "databaseSchema": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics.raw",
+     "id": "06cf5c00-8447-5d3e-be9e-44a66bc2d35b",
+     "name": "raw",
+     "type": "databaseSchema"
+    },
+    "deleted": false,
+    "description": "Raw orders loaded from the shop",
+    "domain": null,
+    "extension": null,
+    "followers": [],
+    "fullyQualifiedName": "snowflake_prod.analytics.raw.orders",
+    "id": "728467f3-7316-599b-81b8-081dc5eae8f0",
+    "name": "orders",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod",
+     "id": "ecaaed1a-2863-5702-89e1-ec78d6efe0c5",
+     "name": "snowflake_prod",
+     "type": "databaseService"
+    },
+    "serviceType": "Snowflake",
+    "sourceUrl": "https://app.snowflake.com/orders",
+    "tableConstraints": [],
+    "tableType": "Regular",
+    "tags": [
+     {
+      "labelType": "Manual",
+      "name": "Tier3",
+      "source": "Classification",
+      "state": "Confirmed",
+      "tagFQN": "Tier.Tier3"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageSummary": {
+     "dailyStats": {
+      "count": 4,
+      "percentileRank": 0.4
+     },
+     "date": "2026-11-14",
+     "monthlyStats": {
+      "count": 80,
+      "percentileRank": 0.3
+     },
+     "weeklyStats": {
+      "count": 20,
+      "percentileRank": 0.3
+     }
+    },
+    "version": 0.2
+   },
+   {
+    "columns": [
+     {
+      "constraint": "PRIMARY_KEY",
+      "dataType": "NUMBER",
+      "dataTypeDisplay": "number(38,0)",
+      "fullyQualifiedName": "snowflake_prod.analytics.raw.customers.customer_id",
+      "name": "customer_id",
+      "ordinalPosition": 1,
+      "tags": []
+     },
+     {
+      "dataLength": 256,
+      "dataType": "VARCHAR",
+      "dataTypeDisplay": "varchar(256)",
+      "fullyQualifiedName": "snowflake_prod.analytics.raw.customers.email",
+      "name": "email",
+      "ordinalPosition": 2,
+      "tags": [
+       {
+        "labelType": "Manual",
+        "name": "Sensitive",
+        "source": "Classification",
+        "state": "Confirmed",
+        "tagFQN": "PII.Sensitive"
+       }
+      ]
+     },
+     {
+      "dataLength": 256,
+      "dataType": "VARCHAR",
+      "dataTypeDisplay": "varchar(256)",
+      "fullyQualifiedName": "snowflake_prod.analytics.raw.customers.name",
+      "name": "name",
+      "ordinalPosition": 3,
+      "tags": [
+       {
+        "labelType": "Manual",
+        "name": "Sensitive",
+        "source": "Classification",
+        "state": "Confirmed",
+        "tagFQN": "PII.Sensitive"
+       }
+      ]
+     },
+     {
+      "constraint": "NOT_NULL",
+      "dataLength": 256,
+      "dataType": "VARCHAR",
+      "dataTypeDisplay": "varchar(256)",
+      "fullyQualifiedName": "snowflake_prod.analytics.raw.customers.country",
+      "name": "country",
+      "ordinalPosition": 4,
+      "tags": []
+     }
+    ],
+    "dataProducts": [],
+    "database": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics",
+     "id": "b998a4ba-7934-5689-b0dd-288022dfc65f",
+     "name": "analytics",
+     "type": "database"
+    },
+    "databaseSchema": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics.raw",
+     "id": "06cf5c00-8447-5d3e-be9e-44a66bc2d35b",
+     "name": "raw",
+     "type": "databaseSchema"
+    },
+    "deleted": false,
+    "description": "Raw customers",
+    "domain": null,
+    "extension": null,
+    "followers": [],
+    "fullyQualifiedName": "snowflake_prod.analytics.raw.customers",
+    "id": "a9d64103-951b-5349-b8f2-97f6f87c2e37",
+    "name": "customers",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     }
+    ],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod",
+     "id": "ecaaed1a-2863-5702-89e1-ec78d6efe0c5",
+     "name": "snowflake_prod",
+     "type": "databaseService"
+    },
+    "serviceType": "Snowflake",
+    "sourceUrl": "https://app.snowflake.com/customers",
+    "tableConstraints": [],
+    "tableType": "Regular",
+    "tags": [
+     {
+      "labelType": "Manual",
+      "name": "Tier3",
+      "source": "Classification",
+      "state": "Confirmed",
+      "tagFQN": "Tier.Tier3"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageSummary": {
+     "dailyStats": {
+      "count": 2,
+      "percentileRank": 0.2
+     },
+     "date": "2026-11-14",
+     "monthlyStats": {
+      "count": 31,
+      "percentileRank": 0.1
+     },
+     "weeklyStats": {
+      "count": 9,
+      "percentileRank": 0.1
+     }
+    },
+    "version": 0.2
+   },
+   {
+    "columns": [
+     {
+      "dataType": "NUMBER",
+      "dataTypeDisplay": "number(38,0)",
+      "fullyQualifiedName": "snowflake_prod.analytics.staging.stg_orders.order_id",
+      "name": "order_id",
+      "ordinalPosition": 1,
+      "tags": []
+     },
+     {
+      "dataType": "NUMBER",
+      "dataTypeDisplay": "number(38,0)",
+      "fullyQualifiedName": "snowflake_prod.analytics.staging.stg_orders.customer_id",
+      "name": "customer_id",
+      "ordinalPosition": 2,
+      "tags": []
+     },
+     {
+      "dataType": "DECIMAL",
+      "dataTypeDisplay": "number(12,2)",
+      "fullyQualifiedName": "snowflake_prod.analytics.staging.stg_orders.amount",
+      "name": "amount",
+      "ordinalPosition": 3,
+      "tags": []
+     }
+    ],
+    "dataProducts": [],
+    "database": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics",
+     "id": "b998a4ba-7934-5689-b0dd-288022dfc65f",
+     "name": "analytics",
+     "type": "database"
+    },
+    "databaseSchema": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics.staging",
+     "id": "b50d0d0a-1508-5f30-a444-cdb357ef35d9",
+     "name": "staging",
+     "type": "databaseSchema"
+    },
+    "deleted": false,
+    "description": "Cleaned orders",
+    "domain": null,
+    "extension": null,
+    "followers": [],
+    "fullyQualifiedName": "snowflake_prod.analytics.staging.stg_orders",
+    "id": "f7cd3c28-6510-546c-9e68-9a781369ca6e",
+    "name": "stg_orders",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod",
+     "id": "ecaaed1a-2863-5702-89e1-ec78d6efe0c5",
+     "name": "snowflake_prod",
+     "type": "databaseService"
+    },
+    "serviceType": "Snowflake",
+    "sourceUrl": "https://app.snowflake.com/stg_orders",
+    "tableConstraints": [],
+    "tableType": "View",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageSummary": {
+     "dailyStats": {
+      "count": 1,
+      "percentileRank": 0.1
+     },
+     "date": "2026-11-14",
+     "monthlyStats": {
+      "count": 18,
+      "percentileRank": 0.1
+     },
+     "weeklyStats": {
+      "count": 5,
+      "percentileRank": 0.1
+     }
+    },
+    "version": 0.2
+   },
+   {
+    "columns": [
+     {
+      "dataType": "NUMBER",
+      "dataTypeDisplay": "number(38,0)",
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.order_id",
+      "name": "order_id",
+      "ordinalPosition": 1,
+      "tags": []
+     },
+     {
+      "constraint": "NOT_NULL",
+      "dataType": "NUMBER",
+      "dataTypeDisplay": "number(38,0)",
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.customer_id",
+      "name": "customer_id",
+      "ordinalPosition": 2,
+      "tags": []
+     },
+     {
+      "dataType": "DECIMAL",
+      "dataTypeDisplay": "number(12,2)",
+      "description": "Order revenue in USD",
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.order_total",
+      "name": "order_total",
+      "ordinalPosition": 3,
+      "tags": [
+       {
+        "labelType": "Manual",
+        "name": "Revenue",
+        "source": "Glossary",
+        "state": "Confirmed",
+        "tagFQN": "Business.Revenue"
+       }
+      ]
+     },
+     {
+      "dataType": "DATE",
+      "dataTypeDisplay": "date",
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.order_date",
+      "name": "order_date",
+      "ordinalPosition": 4,
+      "tags": []
+     },
+     {
+      "dataLength": 256,
+      "dataType": "VARCHAR",
+      "dataTypeDisplay": "varchar(256)",
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders.customer_email",
+      "name": "customer_email",
+      "ordinalPosition": 5,
+      "tags": [
+       {
+        "labelType": "Manual",
+        "name": "Sensitive",
+        "source": "Classification",
+        "state": "Confirmed",
+        "tagFQN": "PII.Sensitive"
+       }
+      ]
+     }
+    ],
+    "dataProducts": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "Orders360",
+      "id": "a2ac5923-8b22-549e-b14e-f77b7e627815",
+      "name": "Orders360",
+      "type": "dataProduct"
+     }
+    ],
+    "database": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics",
+     "id": "b998a4ba-7934-5689-b0dd-288022dfc65f",
+     "name": "analytics",
+     "type": "database"
+    },
+    "databaseSchema": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics.marts",
+     "id": "a00d7b7e-169c-59dc-a9a0-5382f907a64c",
+     "name": "marts",
+     "type": "databaseSchema"
+    },
+    "deleted": false,
+    "description": "One row per order, with revenue",
+    "domain": {
+     "fullyQualifiedName": "Sales",
+     "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+     "name": "Sales",
+     "type": "domain"
+    },
+    "extension": {
+     "sla_hours": 6,
+     "steward": "alice"
+    },
+    "followers": [],
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.fct_orders",
+    "id": "a65ee291-a716-57e2-a7aa-ee4406982336",
+    "name": "fct_orders",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     },
+     {
+      "deleted": false,
+      "displayName": "Analytics",
+      "fullyQualifiedName": "analytics",
+      "id": "92ead837-5498-5c37-8e69-53f2e592fdb9",
+      "name": "analytics",
+      "type": "team"
+     }
+    ],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod",
+     "id": "ecaaed1a-2863-5702-89e1-ec78d6efe0c5",
+     "name": "snowflake_prod",
+     "type": "databaseService"
+    },
+    "serviceType": "Snowflake",
+    "sourceUrl": "https://app.snowflake.com/fct_orders",
+    "tableConstraints": [
+     {
+      "columns": [
+       "order_id"
+      ],
+      "constraintType": "PRIMARY_KEY"
+     }
+    ],
+    "tableType": "Regular",
+    "tags": [
+     {
+      "labelType": "Manual",
+      "name": "Tier1",
+      "source": "Classification",
+      "state": "Confirmed",
+      "tagFQN": "Tier.Tier1"
+     },
+     {
+      "labelType": "Manual",
+      "name": "Revenue",
+      "source": "Glossary",
+      "state": "Confirmed",
+      "tagFQN": "Business.Revenue"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageSummary": {
+     "dailyStats": {
+      "count": 9,
+      "percentileRank": 0.9
+     },
+     "date": "2026-11-14",
+     "monthlyStats": {
+      "count": 240,
+      "percentileRank": 0.8
+     },
+     "weeklyStats": {
+      "count": 60,
+      "percentileRank": 0.9
+     }
+    },
+    "version": 0.3
+   },
+   {
+    "columns": [
+     {
+      "constraint": "PRIMARY_KEY",
+      "dataType": "NUMBER",
+      "dataTypeDisplay": "number(38,0)",
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.customer_id",
+      "name": "customer_id",
+      "ordinalPosition": 1,
+      "tags": []
+     },
+     {
+      "dataLength": 256,
+      "dataType": "VARCHAR",
+      "dataTypeDisplay": "varchar(256)",
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.customer_name",
+      "name": "customer_name",
+      "ordinalPosition": 2,
+      "tags": [
+       {
+        "labelType": "Manual",
+        "name": "Sensitive",
+        "source": "Classification",
+        "state": "Confirmed",
+        "tagFQN": "PII.Sensitive"
+       }
+      ]
+     },
+     {
+      "dataLength": 256,
+      "dataType": "VARCHAR",
+      "dataTypeDisplay": "varchar(256)",
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.country",
+      "name": "country",
+      "ordinalPosition": 3,
+      "tags": []
+     },
+     {
+      "children": [
+       {
+        "dataLength": 256,
+        "dataType": "VARCHAR",
+        "dataTypeDisplay": "varchar",
+        "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.address.city",
+        "name": "city",
+        "ordinalPosition": 1,
+        "tags": []
+       },
+       {
+        "dataLength": 256,
+        "dataType": "VARCHAR",
+        "dataTypeDisplay": "varchar",
+        "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.address.zip",
+        "name": "zip",
+        "ordinalPosition": 2,
+        "tags": []
+       }
+      ],
+      "dataType": "STRUCT",
+      "dataTypeDisplay": "struct<city:varchar,zip:varchar>",
+      "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers.address",
+      "name": "address",
+      "ordinalPosition": 4,
+      "tags": []
+     }
+    ],
+    "dataProducts": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "Orders360",
+      "id": "a2ac5923-8b22-549e-b14e-f77b7e627815",
+      "name": "Orders360",
+      "type": "dataProduct"
+     }
+    ],
+    "database": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics",
+     "id": "b998a4ba-7934-5689-b0dd-288022dfc65f",
+     "name": "analytics",
+     "type": "database"
+    },
+    "databaseSchema": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod.analytics.marts",
+     "id": "a00d7b7e-169c-59dc-a9a0-5382f907a64c",
+     "name": "marts",
+     "type": "databaseSchema"
+    },
+    "deleted": false,
+    "description": "Customer dimension",
+    "domain": {
+     "fullyQualifiedName": "Sales",
+     "id": "fd4ffc9d-658b-5914-a89e-d9c07229e5f4",
+     "name": "Sales",
+     "type": "domain"
+    },
+    "extension": null,
+    "followers": [],
+    "fullyQualifiedName": "snowflake_prod.analytics.marts.dim_customers",
+    "id": "dbb443e2-d7bb-5613-bc02-f20a4bd6b0c8",
+    "name": "dim_customers",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Bob",
+      "fullyQualifiedName": "bob",
+      "id": "87752439-137c-504e-af8b-824c7d09d85b",
+      "name": "bob",
+      "type": "user"
+     }
+    ],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "snowflake_prod",
+     "id": "ecaaed1a-2863-5702-89e1-ec78d6efe0c5",
+     "name": "snowflake_prod",
+     "type": "databaseService"
+    },
+    "serviceType": "Snowflake",
+    "sourceUrl": "https://app.snowflake.com/dim_customers",
+    "tableConstraints": [],
+    "tableType": "Regular",
+    "tags": [
+     {
+      "labelType": "Manual",
+      "name": "Tier1",
+      "source": "Classification",
+      "state": "Confirmed",
+      "tagFQN": "Tier.Tier1"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageSummary": {
+     "dailyStats": {
+      "count": 5,
+      "percentileRank": 0.5
+     },
+     "date": "2026-11-14",
+     "monthlyStats": {
+      "count": 120,
+      "percentileRank": 0.4
+     },
+     "weeklyStats": {
+      "count": 30,
+      "percentileRank": 0.4
+     }
+    },
+    "version": 0.2
+   },
+   {
+    "columns": [
+     {
+      "constraint": "PRIMARY_KEY",
+      "dataType": "INT",
+      "dataTypeDisplay": "integer",
+      "fullyQualifiedName": "postgres_app.app.public.users.id",
+      "name": "id",
+      "ordinalPosition": 1,
+      "tags": []
+     },
+     {
+      "dataLength": 256,
+      "dataType": "VARCHAR",
+      "dataTypeDisplay": "varchar(256)",
+      "fullyQualifiedName": "postgres_app.app.public.users.email",
+      "name": "email",
+      "ordinalPosition": 2,
+      "tags": [
+       {
+        "labelType": "Manual",
+        "name": "Sensitive",
+        "source": "Classification",
+        "state": "Confirmed",
+        "tagFQN": "PII.Sensitive"
+       }
+      ]
+     },
+     {
+      "dataType": "TIMESTAMP",
+      "dataTypeDisplay": "timestamp",
+      "fullyQualifiedName": "postgres_app.app.public.users.created_at",
+      "name": "created_at",
+      "ordinalPosition": 3,
+      "tags": []
+     }
+    ],
+    "dataProducts": [],
+    "database": {
+     "deleted": false,
+     "fullyQualifiedName": "postgres_app.app",
+     "id": "7b8de9c9-064b-5789-b3d6-06222d78415e",
+     "name": "app",
+     "type": "database"
+    },
+    "databaseSchema": {
+     "deleted": false,
+     "fullyQualifiedName": "postgres_app.app.public",
+     "id": "2732a69e-5c78-5ffc-aefc-3c72fc096a21",
+     "name": "public",
+     "type": "databaseSchema"
+    },
+    "deleted": false,
+    "description": "Application users",
+    "domain": null,
+    "extension": null,
+    "followers": [],
+    "fullyQualifiedName": "postgres_app.app.public.users",
+    "id": "c10cadd8-5c43-5741-8bc8-ea20fdf26767",
+    "name": "users",
+    "owners": [],
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "postgres_app",
+     "id": "fb573667-254a-5921-a39d-a9a2e10ee211",
+     "name": "postgres_app",
+     "type": "databaseService"
+    },
+    "serviceType": "Postgres",
+    "sourceUrl": null,
+    "tableConstraints": [],
+    "tableType": "Regular",
+    "tags": [
+     {
+      "labelType": "Manual",
+      "name": "Tier2",
+      "source": "Classification",
+      "state": "Confirmed",
+      "tagFQN": "Tier.Tier2"
+     },
+     {
+      "labelType": "Manual",
+      "name": "Sensitive",
+      "source": "Classification",
+      "state": "Confirmed",
+      "tagFQN": "PII.Sensitive"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageSummary": {
+     "dailyStats": {
+      "count": 3,
+      "percentileRank": 0.3
+     },
+     "date": "2026-11-14",
+     "monthlyStats": {
+      "count": 60,
+      "percentileRank": 0.2
+     },
+     "weeklyStats": {
+      "count": 15,
+      "percentileRank": 0.2
+     }
+    },
+    "version": 0.2
+   }
+  ],
+  "tags": [
+   {
+    "classification": {
+     "deleted": false,
+     "fullyQualifiedName": "PII",
+     "id": "46331d7c-9db4-51ef-8ef7-a498d535bfc3",
+     "name": "PII",
+     "type": "classification"
+    },
+    "deleted": false,
+    "description": "Sensitive data",
+    "disabled": false,
+    "fullyQualifiedName": "PII.Sensitive",
+    "id": "ea4dcb28-bd72-54c8-a1cf-6e746af84f4b",
+    "name": "Sensitive",
+    "provider": "system",
+    "style": {
+     "color": "#ff0000"
+    },
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageCount": 7,
+    "version": 0.2
+   },
+   {
+    "classification": {
+     "deleted": false,
+     "fullyQualifiedName": "PII",
+     "id": "46331d7c-9db4-51ef-8ef7-a498d535bfc3",
+     "name": "PII",
+     "type": "classification"
+    },
+    "deleted": false,
+    "description": "NonSensitive data",
+    "disabled": false,
+    "fullyQualifiedName": "PII.NonSensitive",
+    "id": "fe437b1f-8794-55c2-be1b-37ece1bc10eb",
+    "name": "NonSensitive",
+    "provider": "system",
+    "style": null,
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageCount": 0,
+    "version": 0.2
+   },
+   {
+    "classification": {
+     "deleted": false,
+     "fullyQualifiedName": "PII",
+     "id": "46331d7c-9db4-51ef-8ef7-a498d535bfc3",
+     "name": "PII",
+     "type": "classification"
+    },
+    "deleted": false,
+    "description": "None data",
+    "disabled": false,
+    "fullyQualifiedName": "PII.None",
+    "id": "288896df-60ac-5084-8ef5-55499714b5b5",
+    "name": "None",
+    "provider": "system",
+    "style": null,
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageCount": 0,
+    "version": 0.2
+   },
+   {
+    "classification": {
+     "deleted": false,
+     "fullyQualifiedName": "Tier",
+     "id": "9ea78087-8210-53f7-ad44-f6e2600dcf92",
+     "name": "Tier",
+     "type": "classification"
+    },
+    "deleted": false,
+    "description": "Tier1 data",
+    "disabled": false,
+    "fullyQualifiedName": "Tier.Tier1",
+    "id": "5e38dc33-ac06-5388-bdf8-e25a6a456a70",
+    "name": "Tier1",
+    "provider": "system",
+    "style": null,
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageCount": 4,
+    "version": 0.2
+   },
+   {
+    "classification": {
+     "deleted": false,
+     "fullyQualifiedName": "Tier",
+     "id": "9ea78087-8210-53f7-ad44-f6e2600dcf92",
+     "name": "Tier",
+     "type": "classification"
+    },
+    "deleted": false,
+    "description": "Tier2 data",
+    "disabled": false,
+    "fullyQualifiedName": "Tier.Tier2",
+    "id": "91a8f74a-84b6-50ea-aada-444f6296ab27",
+    "name": "Tier2",
+    "provider": "system",
+    "style": null,
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageCount": 2,
+    "version": 0.2
+   },
+   {
+    "classification": {
+     "deleted": false,
+     "fullyQualifiedName": "Tier",
+     "id": "9ea78087-8210-53f7-ad44-f6e2600dcf92",
+     "name": "Tier",
+     "type": "classification"
+    },
+    "deleted": false,
+    "description": "Tier3 data",
+    "disabled": false,
+    "fullyQualifiedName": "Tier.Tier3",
+    "id": "541135e4-986e-5e11-9755-8959bfbab132",
+    "name": "Tier3",
+    "provider": "system",
+    "style": null,
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "usageCount": 2,
+    "version": 0.2
+   }
+  ],
+  "teams": [
+   {
+    "deleted": false,
+    "description": "The Organization team",
+    "displayName": "Organization",
+    "email": "Organization@example.com",
+    "fullyQualifiedName": "Organization",
+    "id": "9d59c66f-073e-5b3f-a912-d682de941a90",
+    "isJoinable": false,
+    "name": "Organization",
+    "owners": [],
+    "parents": [],
+    "teamType": "Organization",
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "userCount": 4,
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "description": "The analytics team",
+    "displayName": "Analytics",
+    "email": "analytics@example.com",
+    "fullyQualifiedName": "analytics",
+    "id": "92ead837-5498-5c37-8e69-53f2e592fdb9",
+    "isJoinable": true,
+    "name": "analytics",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Alice",
+      "fullyQualifiedName": "alice",
+      "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+      "name": "alice",
+      "type": "user"
+     }
+    ],
+    "parents": [
+     {
+      "deleted": false,
+      "displayName": "Organization",
+      "fullyQualifiedName": "Organization",
+      "id": "9d59c66f-073e-5b3f-a912-d682de941a90",
+      "name": "Organization",
+      "type": "team"
+     }
+    ],
+    "teamType": "Group",
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "userCount": 2,
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "description": "The data-eng team",
+    "displayName": "Data Eng",
+    "email": "data-eng@example.com",
+    "fullyQualifiedName": "data-eng",
+    "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+    "isJoinable": true,
+    "name": "data-eng",
+    "owners": [],
+    "parents": [
+     {
+      "deleted": false,
+      "displayName": "Organization",
+      "fullyQualifiedName": "Organization",
+      "id": "9d59c66f-073e-5b3f-a912-d682de941a90",
+      "name": "Organization",
+      "type": "team"
+     }
+    ],
+    "teamType": "Group",
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "userCount": 1,
+    "version": 0.2
+   }
+  ],
+  "topics": [
+   {
+    "cleanupPolicies": [
+     "delete"
+    ],
+    "deleted": false,
+    "description": "Order events",
+    "domain": null,
+    "followers": [],
+    "fullyQualifiedName": "kafka_prod.orders_events",
+    "id": "c23fbf2a-65ce-54c2-8d1b-f6c6214bc237",
+    "maximumMessageSize": 1048576,
+    "messageSchema": {
+     "schemaText": "{}",
+     "schemaType": "Avro"
+    },
+    "name": "orders_events",
+    "owners": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "partitions": 6,
+    "replicationFactor": 3,
+    "retentionTime": 604800000,
+    "service": {
+     "deleted": false,
+     "fullyQualifiedName": "kafka_prod",
+     "id": "a959e4c1-2fe8-5b64-9d1e-c6018c57fcec",
+     "name": "kafka_prod",
+     "type": "topicService"
+    },
+    "serviceType": "Kafka",
+    "tags": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ],
+  "users": [
+   {
+    "deleted": false,
+    "displayName": "Alice",
+    "email": "alice@example.com",
+    "fullyQualifiedName": "alice",
+    "id": "580279d2-4bcd-5e78-97df-1324ff2fc9b6",
+    "isAdmin": true,
+    "isBot": false,
+    "name": "alice",
+    "roles": [
+     {
+      "deleted": false,
+      "fullyQualifiedName": "DataSteward",
+      "id": "13f744cf-336b-5056-a933-5c8e76f00b88",
+      "name": "DataSteward",
+      "type": "role"
+     }
+    ],
+    "teams": [
+     {
+      "deleted": false,
+      "displayName": "Analytics",
+      "fullyQualifiedName": "analytics",
+      "id": "92ead837-5498-5c37-8e69-53f2e592fdb9",
+      "name": "analytics",
+      "type": "team"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "displayName": "Bob",
+    "email": "bob@example.com",
+    "fullyQualifiedName": "bob",
+    "id": "87752439-137c-504e-af8b-824c7d09d85b",
+    "isAdmin": false,
+    "isBot": false,
+    "name": "bob",
+    "roles": [],
+    "teams": [
+     {
+      "deleted": false,
+      "displayName": "Analytics",
+      "fullyQualifiedName": "analytics",
+      "id": "92ead837-5498-5c37-8e69-53f2e592fdb9",
+      "name": "analytics",
+      "type": "team"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "displayName": "Carol",
+    "email": "carol@example.com",
+    "fullyQualifiedName": "carol",
+    "id": "0cfc9305-99e7-5e39-905f-7c2bd071fe1d",
+    "isAdmin": false,
+    "isBot": false,
+    "name": "carol",
+    "roles": [],
+    "teams": [
+     {
+      "deleted": false,
+      "displayName": "Data Eng",
+      "fullyQualifiedName": "data-eng",
+      "id": "5bb2f195-3e36-5e84-bce7-9a44b1425e7b",
+      "name": "data-eng",
+      "type": "team"
+     }
+    ],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   },
+   {
+    "deleted": false,
+    "displayName": "Ingestion Bot",
+    "email": "ingestion-bot@example.com",
+    "fullyQualifiedName": "ingestion-bot",
+    "id": "f14b2e21-b60c-5250-a4c2-99db05f9364e",
+    "isAdmin": false,
+    "isBot": true,
+    "name": "ingestion-bot",
+    "roles": [],
+    "teams": [],
+    "updatedAt": 1794312000000,
+    "updatedBy": "admin",
+    "version": 0.2
+   }
+  ]
+ },
+ "openmetadata_version": "1.6.2"
+}

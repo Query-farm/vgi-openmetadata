@@ -4,13 +4,10 @@
 # contract with `vgi-lint spec`.
 
 # The worker to attach, relative to this directory. Build it first with `make build`.
-location = ".venv/bin/vgi-starter-worker"
+location = ".venv/bin/vgi-openmetadata-worker"
 
-# template-only:start
-fail_on = "info"
-# template-only:end
 # Fail on warnings while you build. Raise this to "info" before you publish the worker.
-# fork-only: fail_on = "warning"
+fail_on = "info"
 
 # Waive a finding only with a kind and a reason, so the waiver can be audited:
 #   domain-exemption  permanent and legitimate for this worker
@@ -18,8 +15,15 @@ fail_on = "info"
 #   timing            slow or flaky because of the environment, not the metadata
 #   tooling-bug       the linter is wrong; report it upstream
 ignore = [
-  # { code = "VGI146", kind = "domain-exemption", reason = "every entry point needs a key" },
+  { code = "VGI808", kind = "domain-exemption", reason = "dataset_id / domain_id / test_suite_id / assertion_id / incident_id are real, documented joins, but cannot be attested ENFORCED (vgi-python accepts only ENFORCED constraint records): every table is read live from OpenMetadata per query, entities appear and disappear between scans, an id / fqn pushdown fetches soft-deleted entities the listings hide, and references can name entities the bot token cannot see. owners.owner_id names users or teams, not owners." },
 ]
+
+[per_object."openmetadata.main.lineage_edges"]
+ignore = [{ code = "VGI807", kind = "domain-exemption", reason = "an edge has no id: the entity row and its column rows share both ends, and OpenMetadata can record the same column pair under different lineage sources, so no column set is guaranteed unique" }]
+[per_object."openmetadata.main.assertion_results"]
+ignore = [{ code = "VGI807", kind = "domain-exemption", reason = "OpenMetadata test case results are a time series keyed by (testCaseFQN, timestamp) that the API does not guarantee unique (a re-run ingestion can post the same timestamp twice)" }]
+[per_object."openmetadata.main.usage"]
+ignore = [{ code = "VGI144", kind = "domain-exemption", reason = "'usage' is a mass noun and the table name shared with the sibling data-catalog workers (vgi-datahub, vgi-unity-catalog)" }]
 
 # Adopting the gate on a worker that already has findings? Record them once with
 #   vgi-lint lint --baseline vgi-lint-baseline --update-baseline

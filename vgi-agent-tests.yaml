@@ -1,16 +1,118 @@
 # Private graders for the public vgi.agent_test_tasks in the worker's catalog metadata.
-# `vgi-lint lint --ai` runs an agent on each prompt and grades it with check_sql.
-# See https://github.com/Query-farm/vgi-lint-check (VGI920).
+# `vgi-lint lint --ai` (make lint-ai) runs an agent on each prompt and grades it against
+# reference_sql. See https://github.com/Query-farm/vgi-lint-check (VGI920).
+#
+# Every relation needs an `openmetadata` secret. To grade offline, start the replay server
+# (`.venv/bin/python test/mock_openmetadata/server.py --port 8585`) and create
+#   CREATE SECRET (TYPE openmetadata, HOST_PORT 'http://127.0.0.1:8585/api');
+# in the session the agent uses; the answers below are the fixture's (test/fixtures/openmetadata.json).
 tasks:
-  - name: formal_greeting
-    reference_sql: SELECT starter.main.greet('Grace', 'formal') AS greeting
-  - name: sum_of_squares
-    reference_sql: SELECT sum(squared) AS total FROM starter.main.sequence_table(10)
-  - name: stepped_sequence
-    reference_sql: SELECT n FROM starter.main.sequence_table(4, step := 5) ORDER BY n
-  # Reads the public demo API (https://vgi-starter-api.query-farm.services/v1).
-  - name: items_per_category
-    check_sql: >-
-      SELECT count(*) = 3 AND sum(items) = 25
-      FROM (SELECT category, count(*) AS items
-            FROM starter.main.fetch_items('https://vgi-starter-api.query-farm.services/v1') GROUP BY category)
+  - name: tier1_tables
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT qualified_name FROM openmetadata.main.datasets WHERE tier = 'Tier.Tier1' ORDER BY qualified_name
+  - name: pii_columns
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT qualified_name, column_name FROM openmetadata.main.columns WHERE list_contains(tags, 'PII.Sensitive')
+  - name: failing_tests
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT name, qualified_name FROM openmetadata.main.assertions WHERE last_status = 'Failed'
+  - name: upstream_of_orders
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT upstream_qualified_name FROM openmetadata.main.lineage_edges WHERE downstream_fqn = 'snowflake_prod.analytics.marts.fct_orders' AND level = 'dataset'
+  - name: schemas_per_service
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT s.name, count(DISTINCT d.id) AS databases, count(DISTINCT sc.id) AS schemas FROM openmetadata.main.database_services s LEFT JOIN openmetadata.main.databases d ON d.service = s.name LEFT JOIN openmetadata.main.database_schemas sc ON sc.service = s.name GROUP BY s.name
+  - name: dashboard_charts
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT c.name, c.chart_type FROM openmetadata.main.dashboards d, unnest(d.charts) AS u(chart_fqn) JOIN openmetadata.main.charts c ON c.fqn = u.chart_fqn WHERE d.display_name = 'Sales Overview'
+  - name: failed_pipelines
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT name, [t.name FOR t IN tasks] AS task_names FROM openmetadata.main.pipelines WHERE last_run_status = 'Failed'
+  - name: topic_partitions
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT name, partitions, retention_ms / 86400000 AS retention_days FROM openmetadata.main.topics
+  - name: model_features
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT name, unnest(features) AS feature FROM openmetadata.main.ml_models
+  - name: team_owned_assets
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT t.name, t.team_type, count(o.entity_id) AS assets FROM openmetadata.main.teams t LEFT JOIN openmetadata.main.owners o ON o.owner_type = 'team' AND o.owner_name = t.name GROUP BY t.name, t.team_type
+  - name: admin_users
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT username, teams FROM openmetadata.main.users WHERE is_admin AND NOT is_bot
+  - name: pii_tag_usage
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT t.fqn, t.usage_count FROM openmetadata.main.tags t JOIN openmetadata.main.classifications c ON t.classification = c.name WHERE c.name = 'PII'
+  - name: unapproved_terms
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT gt.fqn, g.display_name FROM openmetadata.main.glossary_terms gt JOIN openmetadata.main.glossaries g ON gt.glossary_id = g.id WHERE gt.status <> 'Approved'
+  - name: sales_data_products
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT p.name, p.asset_count, d.domain_type FROM openmetadata.main.data_products p JOIN openmetadata.main.domains d ON p.domain = d.fqn WHERE d.fqn = 'Sales'
+  - name: suite_failures
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT s.name, count(r.run_at) FILTER (WHERE r.status = 'Failed') AS failed_runs FROM openmetadata.main.test_suites s LEFT JOIN openmetadata.main.assertion_results r ON r.table_fqn = s.table_fqn AND r.run_at >= TIMESTAMPTZ '2026-11-01 00:00:00+00' WHERE s.suite_type = 'basic' GROUP BY s.name
+  - name: open_incidents
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT test_case_fqn, assignee, qualified_name FROM openmetadata.main.incidents WHERE state <> 'Resolved'
+  - name: largest_profiled
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT qualified_name, row_count FROM openmetadata.main.dataset_profiles ORDER BY row_count DESC LIMIT 1
+  - name: most_used_tables
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT qualified_name, monthly_query_count FROM openmetadata.main.usage ORDER BY monthly_query_count DESC LIMIT 3
+  - name: slowest_query
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT query, duration_ms FROM openmetadata.main.queries ORDER BY duration_ms DESC LIMIT 1
+  - name: customer_impact
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT DISTINCT downstream_fqn FROM openmetadata.main.lineage('snowflake_prod.analytics.raw.customers', upstream_depth := 0, downstream_depth := 5) WHERE downstream_type IN ('dashboard', 'mlmodel')
+  - name: search_bob_tier1
+    unordered: true
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT qualified_name FROM openmetadata.main.search('*', tier := 'Tier.Tier1', owner := 'bob')
+  - name: sample_rows
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT count(DISTINCT row_number) AS sample_rows FROM openmetadata.main.sample_data('snowflake_prod.analytics.marts.fct_orders')
+  - name: fqn_helpers
+    ignore_column_names: true
+    reference_sql: >-
+      SELECT openmetadata.main.fqn_qualified_name('snowflake_prod.ANALYTICS.Marts.FCT_ORDERS') AS qualified_name, openmetadata.main.split_fqn('snowflake_prod.ANALYTICS.Marts.FCT_ORDERS')[1] AS service

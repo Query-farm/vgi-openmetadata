@@ -1,0 +1,1 @@
+"""VGI openmetadata worker package."""

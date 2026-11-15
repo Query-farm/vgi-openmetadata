@@ -12,5 +12,8 @@
   "optional_files": [
     ".github/workflows/nightly.yml",
     ".github/dependabot.yml"
-  ]
+  ],
+  "name": "openmetadata",
+  "repo": "Query-farm/vgi-openmetadata",
+  "initialized": "2026-11-15"
 }

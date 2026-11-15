@@ -1,314 +1,168 @@
-<!-- managed-by: vgi-starters (edit upstream in shared/README.md.tmpl, then run tools/render.py) -->
 <p align="center">
   <img src="https://query.farm/media-kit/products/vgi/vgi-logo.png" alt="Vector Gateway Interface (VGI)" width="320">
 </p>
 
-<p align="center"><em>A Query.Farm VGI worker for DuckDB, written in Python.</em></p>
+# Query Your OpenMetadata Catalog, Lineage And Data Quality in DuckDB
 
-# VGI Starter Worker — Python
+> **vgi-openmetadata** · a [Query.Farm](https://query.farm) VGI worker
 
-[![CI](https://github.com/Query-farm/vgi-starter-python/actions/workflows/ci.yml/badge.svg)](https://github.com/Query-farm/vgi-starter-python/actions/workflows/ci.yml)
-[![vgi worker: query.farm](https://query.farm/media-kit/shields/vgi-worker.svg)](https://query.farm)
+Read-only SQL over an [OpenMetadata](https://open-metadata.org) server (open source) or
+[Collate](https://www.getcollate.io) (managed OpenMetadata) through its REST API v1: tables and
+columns, owners, tags, glossary terms, domains, table- and column-level lineage, data-quality
+tests and their results, incidents, profiles, usage and queries. Every row carries
+`catalog_tool = 'openmetadata'` and the column names follow the shared data-catalog vocabulary
+used by [vgi-datahub](https://github.com/Query-farm/vgi-datahub), so the two catalogs combine with
+`UNION ALL BY NAME`.
 
-[VGI](https://query.farm/vgi) lets DuckDB call functions that live in a separate
-process: your code, in any language, exposed as ordinary SQL. This worker adds
-three example functions that you rename and replace with your own:
+## Install
 
-| Function | Kind | Shows you how to |
-|---|---|---|
-| `greet(name)` / `greet(name, style)` | scalar | vectorize over a column, overload, constrain a constant |
-| `sequence_table(count, step := 1)` | table | stream rows in batches, take named arguments |
-| `fetch_items(base_url, page_size := 100)` | table | page through a REST API, retry, read a secret |
+Workers are not published to PyPI; run a tagged release straight from GitHub:
 
-<!-- template-only:start -->
-## Use this template
-
-This repository is a **template**. Click **Use this template** on GitHub, or:
-
-```bash
-gh repo create my-org/weather-worker --template Query-farm/vgi-starter-python --private --clone
-cd weather-worker
-make init NAME=weather     # renames catalog, package, binary, env vars; removes this section
-make check                 # lint + tests over every transport + metadata score
+```sh
+uvx --from git+https://github.com/Query-farm/vgi-openmetadata@v0.1.0 vgi-openmetadata-worker --help
 ```
 
-Prefer to work with an AI coding agent? `make init` first, then hand it
-[AGENTS.md](AGENTS.md). See [Using with coding agents](#using-with-coding-agents).
+From a checkout, `make build` creates `.venv/bin/vgi-openmetadata-worker`.
 
-Starters exist for [Python](https://github.com/Query-farm/vgi-starter-python),
-[TypeScript](https://github.com/Query-farm/vgi-starter-typescript),
-[Go](https://github.com/Query-farm/vgi-starter-go),
-[Rust](https://github.com/Query-farm/vgi-starter-rust),
-[Java](https://github.com/Query-farm/vgi-starter-java) and
-[C#](https://github.com/Query-farm/vgi-starter-csharp). They are generated from
-[Query-farm/vgi-starters](https://github.com/Query-farm/vgi-starters); send
-changes there.
-<!-- template-only:end -->
-
-## Quick start
-
-**Prerequisites:** Python 3.13+ and [uv](https://docs.astral.sh/uv/) (it runs the SQL
-test runner and the metadata checker).
-
-```bash
-make build
-```
-
-Then open DuckDB 2.0 or [Haybarn](https://query.farm/products/haybarn) and attach the
-worker. `LOCATION` is the command DuckDB runs to start it; use an absolute path,
-because a relative one resolves against DuckDB's working directory.
-
-**DuckDB 2.0:**
+## Connect to OpenMetadata
 
 ```sql
+-- DuckDB 2.0
 SET allow_extension_repositories = 'allowed';
 CREATE EXTENSION REPOSITORY IF NOT EXISTS query_farm WITH PREFIX 'https://duckdb-extensions.query.farm';
 INSTALL vgi FROM query_farm;
 LOAD vgi FROM query_farm;
-ATTACH 'starter' (TYPE vgi, LOCATION '/abs/path/to/vgi-starter-python/.venv/bin/vgi-starter-worker');
+-- Haybarn 2.0: INSTALL vgi FROM community; LOAD vgi;
+
+ATTACH 'openmetadata' (TYPE vgi,
+  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-openmetadata@v0.1.0 vgi-openmetadata-worker');
+
+CREATE SECRET om (
+  TYPE openmetadata,
+  HOST_PORT 'http://localhost:8585/api',   -- or https://<tenant>.getcollate.io/api
+  TOKEN '<bot JWT>'                        -- Settings > Bots > ingestion-bot (or a personal access token)
+);
 ```
 
-**Haybarn 2.0** (`uvx haybarn-cli`):
-
-```sql
-INSTALL vgi FROM community;
-LOAD vgi;
-ATTACH 'starter' (TYPE vgi, LOCATION '/abs/path/to/vgi-starter-python/.venv/bin/vgi-starter-worker');
-```
-
-Now call the functions:
-
-```sql
-SELECT starter.main.greet('Ada');                         -- Hi, Ada!
-SELECT starter.main.greet('Ada', 'formal');               -- Good day, Ada.
-SELECT * FROM starter.main.sequence_table(5, step := 2) ORDER BY n;
-```
-
-`fetch_items` pages through a REST API. Try it against the public demo API (25 fixed items):
-
-```sql
-SELECT category, count(*) AS items, round(avg(price), 2) AS avg_price
-FROM starter.main.fetch_items('https://vgi-starter-api.query-farm.services/v1')
-GROUP BY category ORDER BY category;
-```
-
-If an older cached extension misbehaves, refresh it with `FORCE INSTALL vgi FROM query_farm;`
-(DuckDB) or `FORCE INSTALL vgi FROM community;` (Haybarn).
-
-## Using it in a pipeline
-
-Worker functions compose with everything else in DuckDB:
-
-```sql
--- Materialize an API into a local table.
-CREATE TABLE items AS SELECT * FROM starter.main.fetch_items('https://vgi-starter-api.query-farm.services/v1');
-
--- Join it with local files.
-SELECT i.name, i.price, s.units
-FROM items i JOIN 'sales.parquet' s ON s.item_id = i.id;
-
--- Call a scalar per row of another table.
-SELECT customer, starter.main.greet(customer, 'formal') FROM read_csv('customers.csv');
-```
-
-## Project layout
-
-```
-src/starter_worker/
-  worker.py        # assembles the catalog; add new functions to FUNCTIONS
-  meta.py          # catalog/schema metadata + helpers (object_tags, column)
-  greet.py         # scalar example (overloads, ConstParam choices)
-  sequence.py      # table function example (named args, streaming state)
-  fetch_items.py   # REST API table function (pagination, retries, secrets)
-tests/             # pytest unit tests (in-process client)
-test/sql/          # sqllogictest files run through DuckDB
-test/mock_api/     # offline mock of the REST API used by tests
-examples/          # recipes: pushdown, caching, catalog tables, aggregates, COPY …
-ci/                # integration harness used by `make test-sql` and CI
-scripts/           # vgi_template.py (init / template-diff)
-vgi-agent-tests.yaml  # private graders for the agent test tasks
-```
-
-## Adding a function
-
-1. Create `src/starter_worker/<name>.py`. Copy the closest example: `greet.py` for a
-   scalar, `sequence.py` for a generator, `fetch_items.py` for an API.
-2. Declare arguments with `Annotated[..., Param(...)]`/`ConstParam(...)` (scalars) or a
-   frozen dataclass of `Annotated[..., Arg(...)]` (table functions). Use `Arg(0, ...)`
-   for positional arguments and `Arg("name", default=...)` for named ones.
-3. Give the class a `class Meta` with `name`, `description`, `tags=object_tags(...)`
-   and `examples`.
-4. Add the class to `FUNCTIONS` in `src/starter_worker/worker.py`.
-
-**Which kind of function?**
-
-| You want to… | Use |
+| Secret field | Meaning |
 |---|---|
-| compute one value per input row | a **scalar** function |
-| return a set of rows from arguments (an API, a file, a generator) | a **table** function |
-| transform or aggregate the rows of a query | a **table in-out** function or an **aggregate** |
-| expose a fixed dataset by name (`SELECT * FROM starter.main.t`) | a **catalog table** |
-| write data out to a file or service | `COPY … TO` with a copy function |
-| accept `INSERT` / `UPDATE` / `DELETE` | a catalog table with insert/update/delete functions |
+| `HOST_PORT` | API root, the same `hostPort` the OpenMetadata SDK takes. `/api` is appended when missing. |
+| `TOKEN` | JWT sent as `Authorization: Bearer`. Redacted in `duckdb_secrets()`; never logged or kept in scan state. |
+| `UI_URL` | Optional UI root for the `url` columns (default: `HOST_PORT` without `/api`). |
+| `PAGE_SIZE` | Optional `limit` / `size` per request, 1..1000 (default 100). |
 
-The [examples/](examples/) folder has a recipe for most of these. Writable tables have no
-recipe:
+HTTP 429 and 5xx responses are retried with exponential backoff that honours `Retry-After`.
+The worker only issues `GET` requests.
 
-A writable table is a catalog `Table` that names a table in-out function per operation in
-`insert_function`, `update_function` and `delete_function`, with the richest result each one
-produces in `write_result_modes`. The helpers in `vgi.write_results` (`write_options`,
-`write_result_schema`, `write_result_batch`, `row_id_field`) read DuckDB's `write_options`
-argument and build the result. UPDATE and DELETE need a scan function that emits
-`row_id_field()` and declares projection pushdown. Transactions: override `attach_supports_transactions`
-and `catalog_transaction_begin` / `_commit` / `_rollback` on the catalog. Since VGI protocol 3.3
-a table's scan and write functions are table-only: hidden from `duckdb_functions()` and not
-callable from SQL. Set `expose_scan=True` on the table to keep the scan callable as an ordinary
-table function too (write functions never are). See
-[Writable tables](https://github.com/Query-farm/vgi-python/blob/main/docs/catalog-interface.md#writable-tables)
-in the vgi-python docs.
+## Tables and functions (schema `main`)
 
-## Secrets and configuration
+| Object | What it returns |
+|---|---|
+| `datasets` | One row per OpenMetadata table: `id`, `fqn`, `platform`, `service`, `database`, `schema`, `name`, `qualified_name`, `subtype`, `owners`, `tags`, `glossary_terms`, `tier`, `domain`, `data_products`, `custom_properties`, ... |
+| `columns` | Every (nested) column: type, constraint, primary key, tags, `is_pii` |
+| `database_services`, `databases`, `database_schemas` | The asset hierarchy (connection settings are never exposed) |
+| `dashboards`, `charts`, `pipelines`, `topics`, `ml_models` | Other data assets with owners, tags, tier, domain |
+| `owners` | One row per (asset, owner) across all asset types |
+| `users`, `teams` | People, bots and the team hierarchy |
+| `classifications`, `tags` | Tag categories (PII, Tier, ...) and their tags with usage counts |
+| `glossaries`, `glossary_terms` | Business glossary with hierarchy, synonyms, related terms, status |
+| `domains`, `data_products` | Data-mesh domains, subdomains and data products |
+| `lineage_edges` | Direct lineage edges: `level = 'dataset'` rows plus one `level = 'column'` row per column pair |
+| `lineage(fqn, entity_type := 'table', upstream_depth := 3, downstream_depth := 3)` | Multi-hop lineage with `direction` and `degree` |
+| `test_suites`, `assertions`, `assertion_results` | Test suites, test cases (latest status) and their result history |
+| `incidents` | Test-case incidents at their latest state (New / Ack / Assigned / Resolved) |
+| `dataset_profiles` | Latest profiler run per table with per-column statistics |
+| `usage` | Query counts and percentile ranks (latest day per table, or daily history for one table) |
+| `queries` | Query entities with the tables they use |
+| `search(query, entity_type := 'table', service, database, schema_name, tag, owner, domain, tier, max_results)` | Full-text search over the OpenMetadata search index |
+| `sample_data(fqn, max_rows := 100)` | Opt-in sample rows in long form; PII-tagged columns are never returned, a PII-tagged table returns nothing |
+| `fqn_qualified_name(fqn)`, `split_fqn(fqn)` | Offline FQN helpers (no server call) |
 
-`fetch_items` shows the recommended pattern. A bearer token comes from a DuckDB secret
-when one exists, and from an environment variable otherwise:
+Shared vocabulary with the other catalog workers: `datasets` (with lower-cased `qualified_name` =
+`database.schema.table`), `columns`, `owners`, `tags`, `glossary_terms`, `domains`,
+`lineage_edges`, `assertions` / `assertion_results`, `usage`; common columns `catalog_tool`, `id`,
+`platform`, `qualified_name`, `description`, `updated_at`, `url`. OpenMetadata ids are UUIDs; the
+`fqn` columns hold fully-qualified names (`service.database.schema.table`).
+
+## What pushes down
+
+| Filter | Becomes |
+|---|---|
+| `id = / IN`, `fqn = / IN` (and `dataset_id`, `table_fqn`, `username`, `name`, ...) | `GET <collection>/{id}` or `GET <collection>/name/{fqn}`; no listing |
+| `service`, `database`, `schema`, `database_fqn`, `schema_fqn`, `subtype`, `tier`, `domain`, `domain_id` `= / IN` on `datasets` (and the asset tables) | an Elasticsearch / OpenSearch `query_filter` on `GET /v1/search/query`, paged with `search_after` |
+| `list_contains(tags, 'x')`, `list_contains(glossary_terms, 'x')`, `list_contains(owners, 'x')` | `tags.tagFQN` / `owners.name.keyword` terms in the same `query_filter` |
+| `service =` on `databases`, `charts`, `queries`; `database_fqn =` on `database_schemas`; `classification =` on `tags`; `glossary_id =` / `parent_id =` on `glossary_terms`; `domain =` on `data_products`; `suite_type =` on `test_suites`; `is_bot =` / `is_admin =` on `users` | the REST list endpoint's own query parameter |
+| `entity_type = / IN` on `owners` | which collections are listed |
+| `table_fqn =` / `test_suite_id =` on `assertions`, `assertion_results` | `entityLink=<#E::table::fqn>` / `testSuiteId` |
+| `run_at` ranges on `assertion_results`; `updated_at` ranges, `state =`, `test_case_fqn =` on `incidents` | `startTs` / `endTs`, `testCaseResolutionStatusType`, `testCaseFQN` |
+| `downstream_fqn =` / `upstream_fqn =` on `lineage_edges` | one `/v1/lineage/table/name/{fqn}` call per table instead of one per table in the catalog |
+| `usage_date` ranges with `table_fqn =` on `usage` | `/v1/usage/table/name/{fqn}?date=&days=` (up to 30 days) |
+
+Every predicate is re-applied by DuckDB afterwards, so pushdown only narrows what is fetched.
+Cursors (`after`, `search_after`, offsets) live in table-function state, so long scans resume on
+any worker process over the HTTP transport.
+
+## Examples
 
 ```sql
-CREATE SECRET (TYPE starter_api, TOKEN 'your-token');      -- per session, never logged
+-- Tier 1 tables and their owners (tier pushes into the search query_filter)
+SELECT qualified_name, owners FROM openmetadata.main.datasets WHERE tier = 'Tier.Tier1' ORDER BY 1;
+
+-- PII columns
+SELECT qualified_name, column_name FROM openmetadata.main.columns WHERE list_contains(tags, 'PII.Sensitive');
+
+-- What feeds fct_orders, column by column
+SELECT upstream_qualified_name, upstream_column, downstream_column, transformation
+FROM openmetadata.main.lineage_edges
+WHERE downstream_fqn = 'snowflake_prod.analytics.marts.fct_orders' AND level = 'column';
+
+-- Dashboards affected by a change to a raw table
+SELECT DISTINCT downstream_fqn FROM openmetadata.main.lineage('snowflake_prod.analytics.raw.customers',
+  upstream_depth := 0, downstream_depth := 5) WHERE downstream_type = 'dashboard';
+
+-- Failing tests and their recent history
+SELECT qualified_name, name, last_result FROM openmetadata.main.assertions WHERE last_status = 'Failed';
+SELECT run_at, status FROM openmetadata.main.assertion_results
+WHERE table_fqn = 'snowflake_prod.analytics.marts.fct_orders' AND run_at >= now() - INTERVAL 7 DAY;
+
+-- One catalog view across OpenMetadata and DataHub
+SELECT catalog_tool, qualified_name, owners FROM openmetadata.main.datasets
+UNION ALL BY NAME
+SELECT catalog_tool, qualified_name, owners FROM datahub.main.datasets;
 ```
-
-```bash
-STARTER_API_TOKEN=your-token make run-http                # for servers and containers
-```
-
-Try it: the demo API's `/v1/auth` endpoint needs the published token `demo-token`.
-
-```sql
-SELECT count(*) FROM starter.main.fetch_items('https://vgi-starter-api.query-farm.services/v1/auth');   -- fails: HTTP 401
-CREATE SECRET (TYPE starter_api, TOKEN 'demo-token');
-SELECT count(*) FROM starter.main.fetch_items('https://vgi-starter-api.query-farm.services/v1/auth');   -- 25
-```
-
-Never bake credentials into the image or the source. If a function can't run without
-real credentials, its examples can't execute in CI either. Set `execute: false` on the
-metadata check for that worker (see `.github/workflows/ci.yml`), and add
-`LINT_ARGS ?= --no-execute` to the Makefile so local runs match.
 
 ## Testing
 
-```bash
-make test-unit                 # fast Python unit tests
-make test-sql                  # test/sql/*.test through DuckDB (stdio)
-make test-sql TRANSPORT=http   # …over HTTP (also: launch)
-make check                     # everything CI runs
+OpenMetadata needs MySQL/PostgreSQL plus Elasticsearch/OpenSearch (4 GB+), so the tests run
+against `test/mock_openmetadata/server.py`: a strict replay of the OpenMetadata **1.6** REST API
+over `test/fixtures/openmetadata.json` (regenerate with `python test/fixtures/build_fixture.py`).
+It rejects unknown query parameters and `fields=` values, strips unrequested optional fields,
+validates the search `query_filter` structure and the fields each index maps, issues opaque
+`after` cursors, and requires `startTs` / `endTs` on time series. Three instances run per suite:
+one answers every third new request with `429 Retry-After: 0`, one requires a bearer token, and a
+strict one refuses unfiltered table / test-case listings, searches without `query_filter`, and
+`startTs=0`, which is how the SQL tests prove pushdown. `GET /__requests` exposes the request log,
+which the SQL tests read with `read_json` to assert the exact `query_filter`, `startTs` and
+`days` the worker sent. No network access is needed.
+
+```sh
+make test-unit                  # pytest
+make test-sql TRANSPORT=stdio   # also launch, http
+make lint-explain               # vgi-lint metadata gate (100/100 at fail_on = info)
+make check                      # everything
 ```
 
-`test/sql/*.test` files are [sqllogictest](https://duckdb.org/docs/stable/dev/sqllogictest/intro)
-scripts. `ci/run-integration.sh` runs them against your worker and fails on any
-unexpected skip, so a broken transport can't hide behind a green run.
-`fetch_items` is tested against `test/mock_api/server.py` so tests are fast and
-offline.
-
-**Testing against real data:** put live tests in their own `.test` file that starts with
-`require-env STARTER_LIVE`. They run only when that variable is set. Add the skip reason
-to `EXPECTED_SKIP_REASONS` in CI.
-
-## Metadata and the quality score
-
-DuckDB, agents and documentation tools discover your functions through their metadata:
-titles, descriptions, argument docs, examples and keywords.
-[vgi-lint](https://github.com/Query-farm/vgi-lint-check) checks it, and CI runs it on
-every push. Its settings live in `vgi-lint.toml`, which `make lint-explain`,
-`vgi-lint lint`, and CI all read. This template scores 100/100 with no findings.
-
-```bash
-make lint-explain                              # findings, each with its fix
-make lint-explain LINT_ARGS="--format agent"   # the same, grouped for coding agents
-make lint-ai                                   # optional: an agent must solve vgi-agent-tests.yaml
-```
-
-Each report also states an **assurance level**: how much was actually verified.
-
-| Level | Reached when | Here |
-|---|---|---|
-| L1 structural | the static metadata is clean | workers that need real credentials (`execute: false` in CI) |
-| L2 behavioural | the examples also run and return what they claim | **the CI gate** |
-| L3 semantic | an agent solves the worker's own test tasks, and the docs are reviewed | `make lint-ai`, before publishing |
-
-- **How strict.** Your copy fails on warnings (`fail_on = "warning"` in `vgi-lint.toml`).
-  Raise it to `"info"` before you publish the worker for others.
-- **The linter isn't pinned.** It tracks the current quality bar, so a new rule can flag
-  metadata that passed yesterday. Fix it, or waive the finding.
-- **Waivers.** If a finding is genuinely wrong for your worker, waive it in
-  `vgi-lint.toml` with a `kind` and a `reason`.
-- **Existing workers.** If you're adding this gate to a worker that already has
-  findings, record them with `vgi-lint lint --baseline vgi-lint-baseline --update-baseline`
-  and set `baseline` in `vgi-lint.toml`. After that, only new findings fail.
-
-Metadata lives in `src/starter_worker/meta.py` and each function's `class Meta`.
-
-## Logging and debugging
-
-stdout carries the Arrow protocol, so **never print to stdout**. Log to stderr instead.
-Use the standard `logging` module (the SDK routes it to stderr); `--debug` or `--log-level DEBUG` turns it up.
-
-- Under DuckDB (stdio/launch), worker stderr shows up in DuckDB's error messages and
-  terminal.
-- In Docker it goes to `docker logs`.
-- `make debug` runs one query against the worker with debug logging on.
-
-## Deploying
-
-The same binary serves stdio (DuckDB starts it locally) or HTTP (you host it):
-
-```bash
-docker build -t weather-worker .
-docker run -p 8000:8000 -e STARTER_API_TOKEN=... weather-worker   # health: GET /health
-```
-
-```sql
-ATTACH 'starter' (TYPE vgi, LOCATION 'https://workers.example.com/starter');
-```
-
-Put hosted workers behind TLS and authentication. See
-[authentication](https://query.farm/vgi/authentication) for bearer tokens and JWTs, and
-[distributing a worker](https://query.farm/vgi/distributing-a-worker) for packaging.
-Pass secrets with `-e` or your platform's secret manager.
-
-## Releasing
-
-Push a tag like `v0.1.0`. The release workflow builds the wheel and sdist, attaches them to the GitHub release, and (if you set the repository variable `PYPI_PUBLISH=true` and configure PyPI Trusted Publishing) publishes to PyPI, so users can run `uvx vgi-starter-worker`. Without PyPI, users install straight from the repo with `uvx --from git+https://github.com/Query-farm/vgi-starter-python@v0.1.0 vgi-starter-worker`. Every artifact is signed with cosign and
-carries SLSA build provenance. `ci/check-version.sh` makes sure the tag matches the
-version in `pyproject.toml`.
-
-## Using with coding agents
-
-[AGENTS.md](AGENTS.md) is written for AI coding agents (Claude Code reads it via
-`CLAUDE.md`; Codex, Cursor and others read it directly). It covers the commands, the
-recipe for adding a function, the metadata checklist and the sharp edges. A good first
-prompt:
-
-> Read AGENTS.md. Replace `fetch_items` with `forecast(lat DOUBLE, lon DOUBLE)` that calls
-> the Open-Meteo API. Include full metadata, a mock-server test and a `STARTER_LIVE` test.
-> You're done when `make check` passes.
-
-## Keeping up with the template
-
-`make template-diff` shows what changed upstream (CI, docs, examples) since your copy was
-made. Your copy records its template version in `.vgi-starter.json`.
-
-## Learn more
-
-- [What is VGI?](https://query.farm/vgi) · [Getting started](https://query.farm/vgi/getting-started) · [Building a worker](https://query.farm/vgi/building-a-worker)
-- [Python SDK docs](https://query.farm/vgi/docs/python/): [scalar tutorial](https://query.farm/vgi/docs/python/tutorial/scalar/), [table tutorial](https://query.farm/vgi/docs/python/tutorial/table/)
-- [Distributing a worker](https://query.farm/vgi/distributing-a-worker) · [Choosing a language](https://query.farm/vgi/languages) · [llms.txt](https://query.farm/vgi/llms.txt)
-- SDK source: [vgi-python](https://github.com/Query-farm/vgi-python) · RPC layer: [https://vgi-rpc-python.query.farm](https://vgi-rpc-python.query.farm)
+Version notes: pinned to the OpenMetadata 1.6 response shapes. The worker also reads the legacy
+single `owner` (pre-1.5) and the plural `domains` (1.8+) fields. `created_at` is not provided:
+OpenMetadata entities carry only `updatedAt`.
 
 ## Support
 
-Open an issue on this repository. For VGI itself, see [query.farm](https://query.farm).
+Open an issue at https://github.com/Query-farm/vgi-openmetadata/issues. For VGI itself, see
+[query.farm](https://query.farm).
 
-## Authorship & license
+## Authorship & License
 
-The starter template is written by [Query.Farm](https://query.farm) and released under
-the [BSD Zero Clause License](LICENSE) (0BSD). Use it for anything, with no attribution
-required. Replace this section with your own license once the code is yours.
+Copyright 2026 Query Farm LLC - https://query.farm
+
+Released under the [BSD Zero Clause License](LICENSE) (0BSD).

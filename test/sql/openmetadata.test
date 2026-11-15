@@ -1,0 +1,653 @@
+# name: test/sql/openmetadata.test
+# description: SQL tests for the openmetadata worker against the strict OpenMetadata 1.6 REST replay server
+# group: [openmetadata]
+
+require vgi
+
+require-env OPENMETADATA_WORKER
+
+require-env OPENMETADATA_MOCK
+
+require-env OPENMETADATA_MOCK_AUTH
+
+require-env OPENMETADATA_MOCK_STRICT
+
+# json + httpfs read the replay server's request log, to assert exactly what was sent.
+statement ok
+LOAD json;
+
+statement ok
+LOAD httpfs;
+
+statement ok
+ATTACH 'openmetadata' (TYPE vgi, LOCATION '{OPENMETADATA_WORKER}');
+
+# ---------------------------------------------------------------- configuration errors
+
+statement error
+SELECT count(*) FROM openmetadata.main.datasets;
+----
+<REGEX>:.*no openmetadata secret found.*
+
+statement ok
+CREATE OR REPLACE SECRET om (TYPE openmetadata, HOST_PORT 'localhost:8585');
+
+statement error
+SELECT count(*) FROM openmetadata.main.datasets;
+----
+<REGEX>:.*host_port must start with http.*
+
+statement ok
+CREATE OR REPLACE SECRET om (TYPE openmetadata, HOST_PORT '{OPENMETADATA_MOCK}', PAGE_SIZE '5000');
+
+statement error
+SELECT count(*) FROM openmetadata.main.datasets;
+----
+<REGEX>:.*page_size must be between 1 and 1000.*
+
+# PAGE_SIZE 2 makes every scan page through several requests; this mock also answers every
+# third new request with 429 + Retry-After, so the retry path runs throughout.
+statement ok
+CREATE OR REPLACE SECRET om (TYPE openmetadata, HOST_PORT '{OPENMETADATA_MOCK}', UI_URL 'https://om.example.com', PAGE_SIZE '2');
+
+# ---------------------------------------------------------------- datasets
+
+query TTTTTTTTTI
+SELECT qualified_name, platform, service, database, schema, name, subtype, tier, domain, column_count
+FROM openmetadata.main.datasets ORDER BY qualified_name;
+----
+analytics.marts.dim_customers	snowflake	snowflake_prod	analytics	marts	dim_customers	Regular	Tier.Tier1	Sales	4
+analytics.marts.fct_orders	snowflake	snowflake_prod	analytics	marts	fct_orders	Regular	Tier.Tier1	Sales	5
+analytics.raw.customers	snowflake	snowflake_prod	analytics	raw	customers	Regular	Tier.Tier3	NULL	4
+analytics.raw.orders	snowflake	snowflake_prod	analytics	raw	orders	Regular	Tier.Tier3	NULL	4
+analytics.staging.stg_orders	snowflake	snowflake_prod	analytics	staging	stg_orders	View	NULL	NULL	3
+app.public.users	postgres	postgres_app	app	public	users	Regular	Tier.Tier2	NULL	3
+
+query TTTTTTT
+SELECT catalog_tool, fqn, owners, tags, glossary_terms, data_products, url
+FROM openmetadata.main.datasets WHERE qualified_name = 'analytics.marts.fct_orders';
+----
+openmetadata	snowflake_prod.analytics.marts.fct_orders	[alice, analytics]	[Tier.Tier1]	[Business.Revenue]	[Orders360]	https://om.example.com/table/snowflake_prod.analytics.marts.fct_orders
+
+query TTTRT
+SELECT custom_properties['sla_hours'], custom_properties['steward'], updated_at, version, deleted
+FROM openmetadata.main.datasets WHERE qualified_name = 'analytics.marts.fct_orders';
+----
+6	alice	2026-11-10 12:00:00+00	0.3	false
+
+# Tables nobody owns.
+query T
+SELECT qualified_name FROM openmetadata.main.datasets WHERE len(owners) = 0;
+----
+app.public.users
+
+# id and fqn fetch entities directly; unknown ones are simply absent.
+query T
+SELECT qualified_name FROM openmetadata.main.datasets
+WHERE id IN ('a65ee291-a716-57e2-a7aa-ee4406982336', '00000000-0000-0000-0000-000000000000');
+----
+analytics.marts.fct_orders
+
+query T
+SELECT name FROM openmetadata.main.datasets
+WHERE fqn IN ('snowflake_prod.analytics.raw.orders', 'snowflake_prod.analytics.raw.nope') ORDER BY name;
+----
+orders
+
+# ---------------------------------------------------------------- pushdown, proven by the strict mock
+
+statement ok
+CREATE OR REPLACE SECRET om (TYPE openmetadata, HOST_PORT '{OPENMETADATA_MOCK_STRICT}/api', PAGE_SIZE '2');
+
+# The strict mock refuses an unfiltered table listing ...
+statement error
+SELECT count(*) FROM openmetadata.main.datasets;
+----
+<REGEX>:.*strict mode: unfiltered /v1/tables listing refused.*
+
+# ... so these only pass because the filters became a search query_filter.
+query T
+SELECT qualified_name FROM openmetadata.main.datasets
+WHERE service = 'snowflake_prod' AND tier = 'Tier.Tier1' ORDER BY qualified_name;
+----
+analytics.marts.dim_customers
+analytics.marts.fct_orders
+
+query T
+SELECT qualified_name FROM openmetadata.main.datasets WHERE list_contains(owners, 'alice') ORDER BY qualified_name;
+----
+analytics.marts.fct_orders
+analytics.raw.customers
+
+query T
+SELECT qualified_name FROM openmetadata.main.datasets WHERE list_contains(tags, 'PII.Sensitive');
+----
+app.public.users
+
+query T
+SELECT qualified_name FROM openmetadata.main.datasets WHERE domain = 'Sales' AND schema IN ('marts', 'raw') ORDER BY 1;
+----
+analytics.marts.dim_customers
+analytics.marts.fct_orders
+
+query T
+SELECT qualified_name FROM openmetadata.main.datasets WHERE database = 'app' AND subtype = 'Regular';
+----
+app.public.users
+
+# The exact query_filter the worker sent.
+query I
+SELECT count(*) > 0 FROM read_json('{OPENMETADATA_MOCK_STRICT}/__requests')
+WHERE path = '/v1/search/query'
+  AND json_extract_string(to_json(params), '$.query_filter')
+      = '{"query":{"bool":{"must":[{"bool":{"should":[{"term":{"service.name.keyword":"snowflake_prod"}}]}},{"bool":{"should":[{"term":{"tier.tagFQN":"Tier.Tier1"}}]}}]}}}'
+  AND json_extract_string(to_json(params), '$.index') = 'table_search_index';
+----
+true
+
+query I
+SELECT count(*) > 0 FROM read_json('{OPENMETADATA_MOCK_STRICT}/__requests')
+WHERE json_extract_string(to_json(params), '$.query_filter')
+      = '{"query":{"bool":{"must":[{"bool":{"should":[{"term":{"owners.name.keyword":"alice"}}]}}]}}}';
+----
+true
+
+# search_after paging was used (PAGE_SIZE 2, two Tier 1 tables).
+query I
+SELECT count(*) > 0 FROM read_json('{OPENMETADATA_MOCK_STRICT}/__requests')
+WHERE json_extract_string(to_json(params), '$.search_after') = 'snowflake_prod.analytics.marts.fct_orders';
+----
+true
+
+# ---------------------------------------------------------------- columns
+
+query TTITTTTT
+SELECT column_name, data_type, ordinal_position, native_data_type, nullable, column_constraint, is_primary_key, is_pii
+FROM openmetadata.main.columns WHERE table_fqn = 'snowflake_prod.analytics.marts.fct_orders' ORDER BY ordinal_position;
+----
+order_id	NUMBER	1	number(38,0)	false	NULL	true	false
+customer_id	NUMBER	2	number(38,0)	false	NOT_NULL	false	false
+order_total	DECIMAL	3	number(12,2)	true	NULL	false	false
+order_date	DATE	4	date	true	NULL	false	false
+customer_email	VARCHAR	5	varchar(256)	true	NULL	false	true
+
+query TT
+SELECT column_name, glossary_terms FROM openmetadata.main.columns
+WHERE table_fqn = 'snowflake_prod.analytics.marts.fct_orders' AND len(glossary_terms) > 0;
+----
+order_total	[Business.Revenue]
+
+# Nested STRUCT children become dotted paths.
+query TI
+SELECT column_name, ordinal_position FROM openmetadata.main.columns
+WHERE dataset_id = 'dbb443e2-d7bb-5613-bc02-f20a4bd6b0c8' AND column_name LIKE 'address%' ORDER BY ordinal_position;
+----
+address	4
+address.city	5
+address.zip	6
+
+query TT
+SELECT qualified_name, column_name FROM openmetadata.main.columns
+WHERE list_contains(tags, 'PII.Sensitive') ORDER BY qualified_name, column_name;
+----
+analytics.marts.dim_customers	customer_name
+analytics.marts.fct_orders	customer_email
+analytics.raw.customers	email
+analytics.raw.customers	name
+app.public.users	email
+
+statement ok
+CREATE OR REPLACE SECRET om (TYPE openmetadata, HOST_PORT '{OPENMETADATA_MOCK}', UI_URL 'https://om.example.com', PAGE_SIZE '2');
+
+# ---------------------------------------------------------------- services, databases, schemas
+
+query TTTTT
+SELECT name, service_type, platform, owners, url FROM openmetadata.main.database_services ORDER BY name;
+----
+postgres_app	Postgres	postgres	[data-eng]	https://om.example.com/service/databaseServices/postgres_app
+snowflake_prod	Snowflake	snowflake	[data-eng]	https://om.example.com/service/databaseServices/snowflake_prod
+
+# Connection settings (and their password) are never exposed.
+query I
+SELECT count(*) FROM openmetadata.main.database_services s WHERE CAST(s AS VARCHAR) LIKE '%s3cr3t%';
+----
+0
+
+query TT
+SELECT fqn, service FROM openmetadata.main.databases WHERE service = 'snowflake_prod';
+----
+snowflake_prod.analytics	snowflake_prod
+
+query TTT
+SELECT name, database, tier FROM openmetadata.main.database_schemas
+WHERE database_fqn = 'snowflake_prod.analytics' ORDER BY name;
+----
+marts	analytics	Tier.Tier1
+raw	analytics	NULL
+staging	analytics	NULL
+
+# ---------------------------------------------------------------- dashboards, charts, pipelines, topics, ML models
+
+query TTTTTT
+SELECT fqn, display_name, platform, charts, tier, domain FROM openmetadata.main.dashboards;
+----
+looker_prod.sales_overview	Sales Overview	looker	[looker_prod.revenue_by_month, looker_prod.orders_by_country]	Tier.Tier2	Sales
+
+query TTT
+SELECT name, chart_type, dashboards FROM openmetadata.main.charts WHERE service = 'looker_prod' ORDER BY name;
+----
+orders_by_country	Bar	[looker_prod.sales_overview]
+revenue_by_month	Line	[looker_prod.sales_overview]
+
+query TTTTT
+SELECT name, [t.name FOR t IN tasks], tasks[1].downstream_tasks, last_run_status, last_run_at
+FROM openmetadata.main.pipelines;
+----
+daily_orders	[extract, transform, load]	[transform]	Failed	2026-11-14 06:20:00+00
+
+query TIIIT
+SELECT name, partitions, replication_factor, retention_ms, schema_type FROM openmetadata.main.topics;
+----
+orders_events	6	3	604800000	Avro
+
+query TTTTT
+SELECT name, algorithm, target, features, dashboard FROM openmetadata.main.ml_models;
+----
+churn_model	XGBoost	churned	[order_count, days_since_last_order]	looker_prod.sales_overview
+
+# ---------------------------------------------------------------- governance
+
+query TTTT
+SELECT entity_type, entity_name, owner_type, owner_name FROM openmetadata.main.owners
+WHERE entity_type IN ('table', 'dashboard') ORDER BY entity_type, entity_name, owner_name;
+----
+dashboard	sales_overview	user	alice
+table	customers	user	alice
+table	dim_customers	user	bob
+table	fct_orders	user	alice
+table	fct_orders	team	analytics
+table	orders	team	data-eng
+table	stg_orders	team	data-eng
+
+query TTI
+SELECT owner_name, owner_type, count(*) FROM openmetadata.main.owners GROUP BY ALL ORDER BY 3 DESC, 1;
+----
+data-eng	team	8
+alice	user	3
+analytics	team	1
+bob	user	1
+carol	user	1
+
+query TTTTT
+SELECT username, email, is_admin, teams, roles FROM openmetadata.main.users WHERE NOT is_bot ORDER BY username;
+----
+alice	alice@example.com	true	[analytics]	[DataSteward]
+bob	bob@example.com	false	[analytics]	[]
+carol	carol@example.com	false	[data-eng]	[]
+
+query T
+SELECT username FROM openmetadata.main.users WHERE is_bot;
+----
+ingestion-bot
+
+query TTTI
+SELECT name, team_type, parents, user_count FROM openmetadata.main.teams ORDER BY name;
+----
+Organization	Organization	[]	4
+analytics	Group	[Organization]	2
+data-eng	Group	[Organization]	1
+
+query TTI
+SELECT name, provider, term_count FROM openmetadata.main.classifications ORDER BY name;
+----
+PII	system	3
+Tier	system	3
+
+query TTIT
+SELECT fqn, classification, usage_count, color FROM openmetadata.main.tags WHERE classification = 'PII' ORDER BY fqn;
+----
+PII.NonSensitive	PII	0	NULL
+PII.None	PII	0	NULL
+PII.Sensitive	PII	7	#ff0000
+
+query TITT
+SELECT name, term_count, reviewers, domain FROM openmetadata.main.glossaries;
+----
+Business	3	[bob]	Sales
+
+query TTTTTT
+SELECT fqn, status, parent_fqn, synonyms, related_terms, [r.endpoint FOR r IN reference_links]
+FROM openmetadata.main.glossary_terms ORDER BY fqn;
+----
+Business.Customer	Approved	NULL	[]	[]	[]
+Business.Revenue	Approved	NULL	[Sales, Turnover]	[Business.Customer]	['https://wiki.example.com/revenue']
+Business.Revenue.Net Revenue	Draft	Business.Revenue	[]	[]	[]
+
+query TTTT
+SELECT fqn, domain_type, parent_domain, experts FROM openmetadata.main.domains ORDER BY fqn;
+----
+Engineering	Source-aligned	NULL	[]
+Sales	Consumer-aligned	NULL	[bob]
+Sales.Online	Source-aligned	Sales	[]
+
+query TTTI
+SELECT name, domain, assets, asset_count FROM openmetadata.main.data_products WHERE domain = 'Sales';
+----
+Orders360	Sales	[snowflake_prod.analytics.marts.fct_orders, snowflake_prod.analytics.marts.dim_customers]	2
+
+# ---------------------------------------------------------------- lineage
+
+query TTTTT
+SELECT level, upstream_qualified_name, upstream_column, downstream_column, transformation
+FROM openmetadata.main.lineage_edges
+WHERE downstream_fqn = 'snowflake_prod.analytics.marts.fct_orders'
+ORDER BY level DESC, upstream_qualified_name, downstream_column;
+----
+dataset	analytics.raw.customers	NULL	NULL	NULL
+dataset	analytics.staging.stg_orders	NULL	NULL	NULL
+column	analytics.raw.customers	email	customer_email	NULL
+column	analytics.staging.stg_orders	order_id	order_id	NULL
+column	analytics.staging.stg_orders	amount	order_total	sum(amount)
+
+query TTTT
+SELECT upstream_fqn, pipeline_fqn, lineage_source, created_at FROM openmetadata.main.lineage_edges
+WHERE downstream_fqn = 'snowflake_prod.analytics.marts.fct_orders' AND level = 'dataset' ORDER BY 1;
+----
+snowflake_prod.analytics.raw.customers	NULL	QueryLineage	2026-11-05 00:00:00+00
+snowflake_prod.analytics.staging.stg_orders	airflow_prod.daily_orders	QueryLineage	2026-11-05 00:00:00+00
+
+# upstream_fqn alone flips the call to downstream edges, so non-table targets appear.
+query TT
+SELECT downstream_type, downstream_fqn FROM openmetadata.main.lineage_edges
+WHERE upstream_fqn = 'snowflake_prod.analytics.marts.fct_orders' AND level = 'dataset';
+----
+dashboard	looker_prod.sales_overview
+
+# Unfiltered: every table's upstream edges.
+query II
+SELECT count(*) FILTER (WHERE level = 'dataset'), count(*) FILTER (WHERE level = 'column') FROM openmetadata.main.lineage_edges;
+----
+4	6
+
+query TTIT
+SELECT DISTINCT direction, upstream_qualified_name, degree, downstream_qualified_name
+FROM openmetadata.main.lineage('snowflake_prod.analytics.marts.fct_orders', downstream_depth := 0)
+WHERE level = 'dataset' ORDER BY degree, upstream_qualified_name;
+----
+upstream	analytics.raw.customers	1	analytics.marts.fct_orders
+upstream	analytics.staging.stg_orders	1	analytics.marts.fct_orders
+upstream	analytics.raw.orders	2	analytics.staging.stg_orders
+
+query TTI
+SELECT DISTINCT downstream_type, downstream_fqn, degree
+FROM openmetadata.main.lineage('snowflake_prod.analytics.raw.customers', upstream_depth := 0, downstream_depth := 5)
+WHERE level = 'dataset' ORDER BY degree, downstream_fqn;
+----
+table	snowflake_prod.analytics.marts.dim_customers	1
+table	snowflake_prod.analytics.marts.fct_orders	1
+dashboard	looker_prod.sales_overview	2
+mlmodel	mlflow_prod.churn_model	2
+
+query I
+SELECT count(*) FROM openmetadata.main.lineage('looker_prod.sales_overview', entity_type := 'dashboard', downstream_depth := 0, upstream_depth := 1);
+----
+1
+
+statement error
+SELECT * FROM openmetadata.main.lineage('snowflake_prod.analytics.raw.missing');
+----
+<REGEX>:.*HTTP 404.*
+
+statement error
+SELECT * FROM openmetadata.main.lineage('x', upstream_depth := 11);
+----
+<REGEX>:.*
+
+# ---------------------------------------------------------------- data quality
+
+query TTIIII
+SELECT name, suite_type, test_count, success, failed, aborted FROM openmetadata.main.test_suites ORDER BY name;
+----
+critical_checks	logical	1	0	1	0
+snowflake_prod.analytics.marts.dim_customers.testSuite	basic	1	1	0	0
+snowflake_prod.analytics.marts.fct_orders.testSuite	basic	2	1	1	0
+
+query TT
+SELECT name, qualified_name FROM openmetadata.main.test_suites WHERE suite_type = 'basic' ORDER BY 1;
+----
+snowflake_prod.analytics.marts.dim_customers.testSuite	analytics.marts.dim_customers
+snowflake_prod.analytics.marts.fct_orders.testSuite	analytics.marts.fct_orders
+
+query TTTTTTT
+SELECT name, qualified_name, column_name, assertion_type, test_definition, last_status, last_run_at
+FROM openmetadata.main.assertions ORDER BY qualified_name, name;
+----
+customer_id_not_null	analytics.marts.dim_customers	customer_id	column	columnValuesToBeNotNull	Success	2026-11-03 07:00:00+00
+order_id_unique	analytics.marts.fct_orders	order_id	column	columnValuesToBeUnique	Success	2026-11-03 06:30:00+00
+row_count_between	analytics.marts.fct_orders	NULL	table	tableRowCountToBeBetween	Failed	2026-11-03 06:30:00+00
+
+query TTT
+SELECT name, parameters['minValue'], last_result FROM openmetadata.main.assertions WHERE last_status = 'Failed';
+----
+row_count_between	1000	Row count 0 outside [1000, 5000]
+
+query TTTTI
+SELECT assertion_fqn, run_at, status, result_values['rowCount'], failed_rows
+FROM openmetadata.main.assertion_results WHERE assertion_fqn = 'snowflake_prod.analytics.marts.fct_orders.row_count_between'
+ORDER BY run_at;
+----
+snowflake_prod.analytics.marts.fct_orders.row_count_between	2026-11-01 06:30:00+00	Success	1200	NULL
+snowflake_prod.analytics.marts.fct_orders.row_count_between	2026-11-02 06:30:00+00	Failed	12	NULL
+snowflake_prod.analytics.marts.fct_orders.row_count_between	2026-11-03 06:30:00+00	Failed	0	NULL
+
+query TII
+SELECT qualified_name, count(*) FILTER (WHERE status = 'Failed'), count(*)
+FROM openmetadata.main.assertion_results GROUP BY qualified_name ORDER BY qualified_name;
+----
+analytics.marts.dim_customers	0	2
+analytics.marts.fct_orders	2	6
+
+query TTTTTT
+SELECT state, severity, assignee, test_case_fqn, qualified_name, updated_at
+FROM openmetadata.main.incidents ORDER BY updated_at;
+----
+Resolved	NULL	NULL	snowflake_prod.analytics.marts.dim_customers.customer_id.customer_id_not_null	analytics.marts.dim_customers	2026-10-21 10:00:00+00
+Assigned	Severity2	carol	snowflake_prod.analytics.marts.fct_orders.row_count_between	analytics.marts.fct_orders	2026-11-02 09:00:00+00
+
+query TTT
+SELECT resolved_by, failure_reason, failure_comment FROM openmetadata.main.incidents WHERE state = 'Resolved';
+----
+bob	FalsePositive	Late-arriving rows
+
+# Pushdown of table, test case and time ranges, proven by the strict mock (it refuses
+# test-case listings without entityLink and time-series calls with startTs=0).
+statement ok
+CREATE OR REPLACE SECRET om (TYPE openmetadata, HOST_PORT '{OPENMETADATA_MOCK_STRICT}', PAGE_SIZE '2');
+
+statement error
+SELECT count(*) FROM openmetadata.main.assertions;
+----
+<REGEX>:.*strict mode: test case listing without entityLink refused.*
+
+query T
+SELECT name FROM openmetadata.main.assertions WHERE table_fqn = 'snowflake_prod.analytics.marts.fct_orders' ORDER BY name;
+----
+order_id_unique
+row_count_between
+
+statement error
+SELECT count(*) FROM openmetadata.main.assertion_results WHERE table_fqn = 'snowflake_prod.analytics.marts.fct_orders';
+----
+<REGEX>:.*strict mode: startTs=0 refused.*
+
+query TT
+SELECT run_at, status FROM openmetadata.main.assertion_results
+WHERE table_fqn = 'snowflake_prod.analytics.marts.fct_orders'
+  AND assertion_fqn = 'snowflake_prod.analytics.marts.fct_orders.row_count_between'
+  AND run_at >= TIMESTAMPTZ '2026-11-02 00:00:00+00' AND run_at < TIMESTAMPTZ '2026-11-03 00:00:00+00';
+----
+2026-11-02 06:30:00+00	Failed
+
+query I
+SELECT count(*) > 0 FROM read_json('{OPENMETADATA_MOCK_STRICT}/__requests')
+WHERE path = '/v1/dataQuality/testCases/testCaseResults/snowflake_prod.analytics.marts.fct_orders.row_count_between'
+  AND json_extract_string(to_json(params), '$.startTs') = '1793577600000'
+  AND json_extract_string(to_json(params), '$.endTs') = '1793664000000';
+----
+true
+
+query TT
+SELECT state, test_case_fqn FROM openmetadata.main.incidents
+WHERE updated_at >= TIMESTAMPTZ '2026-11-01 00:00:00+00' AND state = 'Assigned';
+----
+Assigned	snowflake_prod.analytics.marts.fct_orders.row_count_between
+
+query I
+SELECT count(*) > 0 FROM read_json('{OPENMETADATA_MOCK_STRICT}/__requests')
+WHERE path = '/v1/dataQuality/testCases/testCaseIncidentStatus'
+  AND json_extract_string(to_json(params), '$.testCaseResolutionStatusType') = 'Assigned'
+  AND json_extract_string(to_json(params), '$.startTs') = '1793491200000';
+----
+true
+
+statement ok
+CREATE OR REPLACE SECRET om (TYPE openmetadata, HOST_PORT '{OPENMETADATA_MOCK}', PAGE_SIZE '2');
+
+# ---------------------------------------------------------------- profiles, usage, queries
+
+query TTIII
+SELECT qualified_name, profiled_at, row_count, column_count, size_bytes
+FROM openmetadata.main.dataset_profiles ORDER BY qualified_name;
+----
+analytics.marts.dim_customers	2026-11-14 05:05:00+00	300	1	16384
+analytics.marts.fct_orders	2026-11-14 05:00:00+00	1225	2	98304
+analytics.raw.orders	2026-11-13 05:00:00+00	1300	0	120000
+
+query TTRIT
+SELECT p.qualified_name, c.column_name, c.null_proportion, c.unique_count, c.max
+FROM openmetadata.main.dataset_profiles p, unnest(p.column_profiles) AS u(c)
+WHERE p.table_fqn = 'snowflake_prod.analytics.marts.fct_orders' ORDER BY c.column_name;
+----
+analytics.marts.fct_orders	customer_email	0.8	200	NULL
+analytics.marts.fct_orders	order_id	0.0	1225	1225
+
+# Without a table filter: the latest usage summary of every table.
+query TTIII
+SELECT qualified_name, usage_date, query_count, weekly_query_count, monthly_query_count
+FROM openmetadata.main.usage ORDER BY monthly_query_count DESC LIMIT 3;
+----
+analytics.marts.fct_orders	2026-11-14	9	60	240
+analytics.marts.dim_customers	2026-11-14	5	30	120
+analytics.raw.orders	2026-11-14	4	20	80
+
+# With one: the daily history, the usage_date range pushed down as date / days.
+query TIR
+SELECT usage_date, query_count, percentile_rank FROM openmetadata.main.usage
+WHERE table_fqn = 'snowflake_prod.analytics.marts.fct_orders'
+  AND usage_date BETWEEN DATE '2026-11-11' AND DATE '2026-11-13' ORDER BY usage_date;
+----
+2026-11-11	7	91.0
+2026-11-12	6	92.0
+2026-11-13	8	93.0
+
+query I
+SELECT count(*) > 0 FROM read_json('{OPENMETADATA_MOCK}/__requests')
+WHERE path = '/v1/usage/table/name/snowflake_prod.analytics.marts.fct_orders'
+  AND json_extract_string(to_json(params), '$.days') = '3'
+  AND json_extract_string(to_json(params), '$.date') = '2026-11-13';
+----
+true
+
+query TRTT
+SELECT name, duration_ms, users, used_in FROM openmetadata.main.queries ORDER BY duration_ms DESC;
+----
+q0002	4210.5	[bob]	[snowflake_prod.analytics.marts.fct_orders, snowflake_prod.analytics.marts.dim_customers]
+q0001	1520.0	[alice]	[snowflake_prod.analytics.marts.fct_orders]
+
+query T
+SELECT query FROM openmetadata.main.queries WHERE service = 'snowflake_prod' AND list_contains(used_in, 'snowflake_prod.analytics.marts.dim_customers');
+----
+select * from marts.fct_orders join marts.dim_customers using (customer_id)
+
+# ---------------------------------------------------------------- search()
+
+query TTR
+SELECT entity_type, qualified_name, score FROM openmetadata.main.search('orders') ORDER BY score DESC, qualified_name;
+----
+table	analytics.raw.orders	3.0
+table	analytics.staging.stg_orders	3.0
+table	analytics.marts.fct_orders	2.0
+
+query T
+SELECT qualified_name FROM openmetadata.main.search('*', tier := 'Tier.Tier1', owner := 'bob');
+----
+analytics.marts.dim_customers
+
+query TT
+SELECT entity_type, fqn FROM openmetadata.main.search('*', entity_type := 'all', domain := 'Sales') ORDER BY entity_type, fqn;
+----
+dashboard	looker_prod.sales_overview
+glossaryTerm	Business.Customer
+glossaryTerm	Business.Revenue
+glossaryTerm	Business.Revenue.Net Revenue
+mlmodel	mlflow_prod.churn_model
+table	snowflake_prod.analytics.marts.dim_customers
+table	snowflake_prod.analytics.marts.fct_orders
+
+query I
+SELECT count(*) FROM openmetadata.main.search('*', max_results := 3);
+----
+3
+
+# ---------------------------------------------------------------- sample_data()
+
+# PII-tagged columns (customer_email) are never returned.
+query ITT
+SELECT row_number, column_name, value FROM openmetadata.main.sample_data('snowflake_prod.analytics.marts.fct_orders')
+WHERE row_number <= 2 ORDER BY row_number, column_name;
+----
+1	customer_id	10
+1	order_date	2026-11-01
+1	order_id	1
+1	order_total	99.5
+2	customer_id	11
+2	order_date	2026-11-01
+2	order_id	2
+2	order_total	12.0
+
+query I
+SELECT count(*) FROM openmetadata.main.sample_data('snowflake_prod.analytics.marts.fct_orders') WHERE column_name = 'customer_email';
+----
+0
+
+query IT
+SELECT count(*), count(value) FROM openmetadata.main.sample_data('snowflake_prod.analytics.marts.fct_orders', max_rows := 3) WHERE column_name = 'order_total';
+----
+3	2
+
+# A table tagged PII itself returns nothing.
+query I
+SELECT count(*) FROM openmetadata.main.sample_data('postgres_app.app.public.users');
+----
+0
+
+# ---------------------------------------------------------------- authentication
+
+statement ok
+CREATE OR REPLACE SECRET om (TYPE openmetadata, HOST_PORT '{OPENMETADATA_MOCK_AUTH}', TOKEN 'wrong-token');
+
+statement error
+SELECT count(*) FROM openmetadata.main.tags;
+----
+<REGEX>:.*HTTP 401 \(check the openmetadata secret's TOKEN\).*
+
+statement ok
+CREATE OR REPLACE SECRET om (TYPE openmetadata, HOST_PORT '{OPENMETADATA_MOCK_AUTH}', TOKEN 'test-token');
+
+query I
+SELECT count(*) FROM openmetadata.main.tags;
+----
+6
+
+statement ok
+DETACH openmetadata;
