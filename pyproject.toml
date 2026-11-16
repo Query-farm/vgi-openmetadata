@@ -1,6 +1,6 @@
 [project]
 name = "vgi-openmetadata-worker"
-version = "0.1.0"
+version = "0.1.1"
 description = "OpenMetadata and Collate metadata catalog (assets, governance, lineage, data quality) as DuckDB SQL tables."
 readme = "README.md"
 license = "MIT-0"
@@ -9,7 +9,7 @@ requires-python = ">=3.13"
 dependencies = [
     # [http] adds the HTTP transport (`--http`) used by Docker deploys.
     # SDK bumps go through the template (minor bumps can raise the protocol).
-    "vgi-python[http]>=0.51.1,<0.52",
+    "vgi-python[http,haybarn]>=0.51.1,<0.52",
 ]
 
 [project.scripts]
