@@ -263,7 +263,7 @@ def ts(millis: Any) -> datetime | None:
         if value < 10_000_000_000:
             value *= 1000
         return datetime.fromtimestamp(value / 1000.0, tz=UTC)
-    except (TypeError, ValueError, OverflowError, OSError):
+    except TypeError, ValueError, OverflowError, OSError:
         return None
 
 
@@ -273,7 +273,7 @@ def to_int(value: Any) -> int | None:
         return None
     try:
         return int(value)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
 
@@ -283,7 +283,7 @@ def to_float(value: Any) -> float | None:
         return None
     try:
         return float(value)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
 
