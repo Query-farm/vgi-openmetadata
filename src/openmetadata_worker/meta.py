@@ -75,15 +75,12 @@ CATALOG_COMMENT = "OpenMetadata and Collate metadata catalog (assets, governance
 
 CATALOG_DOC_LLM = (
     "Read-only SQL access to an OpenMetadata (open-source) or Collate (managed) metadata catalog through "
-    "its REST API v1. Tables in schema `main`: database_services, databases, database_schemas, datasets "
-    "(OpenMetadata tables), columns, dashboards, charts, pipelines, topics, ml_models; owners, users, teams, "
-    "classifications, tags, glossaries, glossary_terms, domains, data_products; lineage_edges; test_suites, "
-    "assertions (test cases), assertion_results (test case results), incidents, dataset_profiles, usage, "
-    "queries. Functions: lineage(fqn, ...) for multi-hop lineage, search(query, ...) for full-text search, "
-    "sample_data(fqn) for opt-in sample rows (PII-tagged columns are never returned). Every row has "
-    "catalog_tool = 'openmetadata'; tables share column names (qualified_name = lower-cased "
-    "database.schema.table, id, platform, description, updated_at, url) with the sibling DataHub worker so "
-    "results can be combined with UNION ALL BY NAME. Connect with "
+    "its REST API v1: data assets and their columns, ownership and governance (users, teams, tags, "
+    "glossaries, domains), table and column lineage, data-quality tests with their results and incidents, "
+    "profiles, usage and queries, plus full-text search and opt-in sample rows (PII-tagged columns are never "
+    "returned). Every row has catalog_tool = 'openmetadata'; tables share column names (qualified_name = "
+    "lower-cased database.schema.table, id, platform, description, updated_at, url) with the sibling DataHub "
+    "worker so results can be combined with UNION ALL BY NAME. Connect with "
     "CREATE SECRET (TYPE openmetadata, HOST_PORT 'http://localhost:8585/api', TOKEN '<bot JWT>'). "
     "Filters on id / fqn fetch entities directly; filters on service, database, schema, tier, domain, tags "
     "and owners become an Elasticsearch query_filter; time ranges on result / incident timestamps become "
@@ -102,15 +99,12 @@ CATALOG_DOC_MD = (
 )
 
 SCHEMA_DOC_LLM = (
-    "The `main` schema mirrors an OpenMetadata catalog. Start from `datasets` (one row per OpenMetadata "
-    "table: id, fqn = service.database.schema.table, qualified_name, service, platform, database, schema, "
-    "owners, tags, tier, glossary_terms, domain) and `columns`. Governance: owners (entity -> owner rows), "
-    "users, teams, classifications, tags, glossaries, glossary_terms, domains, data_products. Lineage: "
-    "lineage_edges (direct table and column edges) and lineage(fqn, upstream_depth, downstream_depth). "
-    "Quality: test_suites, assertions (test cases), assertion_results (runs; filter run_at to push a time "
-    "range), incidents, dataset_profiles (latest table and column profile), usage (daily query counts) and "
-    "queries. search(query, ...) runs full-text search; sample_data(fqn) returns sample rows only on request "
-    "and never for PII-tagged columns. Ids are OpenMetadata UUIDs; fqn columns are fully-qualified names."
+    "The `main` schema mirrors an OpenMetadata catalog, one table per concept: assets, governance, "
+    "lineage, data quality, profiles and usage. Start from the datasets table (one row per OpenMetadata "
+    "table, keyed by id and fqn = service.database.schema.table, with owners, tags, tier, glossary terms "
+    "and domain) and join out by id or fqn. Multi-hop lineage and full-text search are table functions; "
+    "sample rows are returned only on request and never for PII-tagged columns. Ids are OpenMetadata "
+    "UUIDs; fqn columns are fully-qualified names. Filter a quality-result time range to push it down."
 )
 
 SCHEMA_DOC_MD = (
