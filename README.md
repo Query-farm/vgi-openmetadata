@@ -19,10 +19,12 @@ used by [vgi-datahub](https://github.com/Query-farm/vgi-datahub), so the two cat
 Workers are not published to PyPI; run a tagged release straight from GitHub:
 
 ```sh
-uvx --from git+https://github.com/Query-farm/vgi-openmetadata@v0.1.2 vgi-openmetadata-worker --help
+uvx --from git+https://github.com/Query-farm/vgi-openmetadata@v0.2.0 vgi-openmetadata-worker --help
 ```
 
 From a checkout, `make build` creates `.venv/bin/vgi-openmetadata-worker`.
+
+vgi-openmetadata 0.2.0 speaks VGI protocol 3.4, so it needs Haybarn 2.0.1 or newer (Haybarn 2.0.0 loads a 3.3 `vgi` extension that cannot attach it).
 
 ## Connect to OpenMetadata
 
@@ -35,7 +37,7 @@ LOAD vgi FROM query_farm;
 -- Haybarn 2.0: INSTALL vgi FROM community; LOAD vgi;
 
 ATTACH 'openmetadata' (TYPE vgi,
-  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-openmetadata@v0.1.2 vgi-openmetadata-worker');
+  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-openmetadata@v0.2.0 vgi-openmetadata-worker');
 
 CREATE SECRET om (
   TYPE openmetadata,
